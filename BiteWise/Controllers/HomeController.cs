@@ -1,25 +1,32 @@
-using System.Diagnostics;
+using BiteWise.BLL.Models;
+using BiteWise.BLL.Services.Interfaces;
 using BiteWise.Models;
+using BiteWise.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 
-namespace BiteWise.Controllers
+namespace BiteWise.Controllers;
+
+public class HomeController(IService<Article> articleService) : Controller
 {
-    public class HomeController : Controller
+    private readonly IService<Article> _articleService= articleService;
+
+    public async Task<IActionResult> Index()
     {
-        public IActionResult Index()
-        {
-            return View();
-        }
+        var model = new MainViewModel();
+        model.DashBoardView.Articles = [.. _articleService.GetAllAsync().Result.OrderByDescending(a => a.Created)];
 
-        public IActionResult Privacy()
-        {
-            return View();
-        }
+        return View(model);
+    }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
+    public IActionResult Privacy()
+    {
+        return View();
+    }
+
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    public IActionResult Error()
+    {
+        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 }

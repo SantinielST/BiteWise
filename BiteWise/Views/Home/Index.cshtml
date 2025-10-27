@@ -1,8 +1,58 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@inject BiteWise.BLL.Services.UserService UserService;
+
+@{
+    ViewData["Title"] = "Main Page";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+@if (UserService.IsSignIn(User))
+{
+    <meta http-equiv="refresh" content="0, url=@Url.Action("Login", "Account")" />
+}
+else
+{
+    <div class="row">
+        <div class="main">
+            <partial name="Login" model="Model.LoginView" />
+            <partial name="Register" model="Model.RegisterView" />
+        </div>
+        <div class="side">
+            <div class="center-align gray-text">
+                Техно блог обо всем!
+            </div>
+            <div class="mrgn center-align gray-text">
+                <p>
+                    Последние статьи:
+                </p>
+            </div>
+            <div class="article-container">
+            @if (Model.DashBoardView.Articles is not null)
+            {
+                @foreach (var article in Model.DashBoardView.Articles)
+                {
+                    <div class="article-card">
+                        <div>
+                            <img src="@article.Image" class="profile-picture" alt="Profile picture" />
+                        </div>
+                        <div>
+                                <div style="width: 200px"><p>@article.Title</p></div>
+                        <div style="font-size: 12px">@article.Created</div>
+                            </div>
+                            <div style="margin-left: 200px">
+                            <form asp-controller="Article" asp-action="GetArticle" asp-route-id="@article.Id" method="get">
+                                <button type="submit" class="btn btn-sm btn-primary min-width-but">Почитать статью</button>
+                            </form>
+                          </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div>
+                    <img class="main-img" src="https://positroid.tech/thumbs/1460%C3%971100/entries/1757757907_main.jpg" alt="Main picture" />
+                </div>
+            }
+            </div>
+        </div>
+    </div>
+}

@@ -1,0 +1,10 @@
+﻿@using BiteWise.BLL.Models
+@inject BiteWise.BLL.Services.UserService UserService
+@inject IHttpContextAccessor HttpContextAccessor
+
+@if (UserService.IsSignIn(User))
+{
+    <form method="post" asp-controller="Account" asp-action="Logout" class="form-inline">
+        <button type="submit" class="enter_submit">Выход</button>
+    </form>
+}

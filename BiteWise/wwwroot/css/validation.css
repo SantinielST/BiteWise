@@ -1,0 +1,18 @@
+﻿.field-validation-error,
+.validation-summary-errors {
+    color: #b94a48;
+}
+
+.field-validation-valid,
+.validation-summary-valid {
+    display: none;
+}
+
+input.input-validation-error {
+    border: 2px solid #dc3545;
+    background-color: #fff0f0;
+}
+
+input[type="checkbox"].input-validation-error {
+    border: 0 none;
+}

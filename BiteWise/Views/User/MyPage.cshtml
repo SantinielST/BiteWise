@@ -1,0 +1,93 @@
+﻿@model BiteWise.ViewModels.UserViewModels.UserViewModel
+
+@{
+    ViewData["Title"] = "MyPage";
+}
+<form method="get" asp-controller="DashBoard" asp-action="Index" class="form-inline">
+    <button type="submit" class="enter_submit">На главную страницу</button>
+</form>
+
+<div class="block-reg background-white">
+    <h4>@Model.User?.Email</h4>
+    <div>
+       
+    </div>
+</div>
+<div class="row">
+    <div class="main">
+        <img class="main-img" src="@Model.User?.Image" />
+        <div class="center-align">
+            <form method="get" asp-controller="User" asp-action="EditUser">
+                <input class="enter_submit" type="submit" value="Редактировать профиль" />
+            </form>
+            <form asp-controller="Article" asp-action="Create" method="get">
+                <input class="enter_submit" type="submit" value="Написать статью"/>
+            </form>
+        </div>
+    </div>
+    <div class="side">
+        <div class="lined-block">
+            <div>
+                <label class="gray-text">Статус:</label>
+                <label>@Model.User?.Status</label>
+            </div>
+            <div>
+                <label class="gray-text">О себе:</label>
+                <label>@Model.User?.About</label>
+            </div>
+            <div>
+                <label class="gray-text">Твои роли:</label>
+                @if (Model.User is not null && Model.User.Roles is not null)
+                {    @foreach (var role in Model.User.Roles)
+                     {
+                       <div style="display: inline-block">
+                           <label>@role</label>
+                       </div>
+                     }
+                }
+            </div>
+        </div>
+        <div class="lined-block">
+            <label class="gray-text">Список статей</label>
+
+            @if (Model.User?.Articles != null)
+            {
+                <div class="article-container">
+                    @foreach (var article in Model.User.Articles.OrderByDescending(a => a.Created))
+                    {
+                        <div class="article-card">
+                            <div>
+                                <img src="@article.Image" class="profile-picture" alt="Profile picture" />
+                            </div>
+                            <div>
+                                <div style="width: 200px"><p>@article.Title</p></div>
+                                <div style="font-size: 12px">@article.Created</div>
+                            </div>
+                            <div class="mrgn center-align">
+                                <form asp-controller="Article" asp-action="GetArticle" asp-route-id="@article.Id" method="get">
+                                    <button type="submit" class="btn btn-sm btn-primary min-width-but">Почитать статью</button>
+                                </form>
+                            </div>
+                            <div class="mrgn center-align">
+                                <form asp-controller="Article" asp-action="EditArticle" asp-route-id="@article.Id" method="get">
+                                    <button type="submit" class="btn btn-sm btn-primary min-width-but">Изменить статью</button>
+                                </form>
+                            </div>
+                            <div class="mrgn center-align">
+                                <form asp-controller="Article" asp-action="DeleteArticle" asp-route-id="@article.Id" method="post">
+                                    <button type="submit" class="btn btn-sm btn-primary min-width-but">Удалить статью</button>
+                                </form>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div>
+                    <label>У вас пока нет статей.</label>
+                </div>
+            }
+        </div>
+    </div>
+</div>

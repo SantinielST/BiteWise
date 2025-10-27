@@ -4,6 +4,9 @@ namespace BiteWise.DLL.Entities;
 
 public class UserEntity : IdentityUser
 {
-    public string? Login { get; set; }
-    public required string Password { get; set; }
+    public string? Image { get; set; }
+
+    public string? Status { get; set; }
+
+    public string? About { get; set; }
 }

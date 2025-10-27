@@ -7,11 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BiteWise.DLL\BiteWise.DLL.csproj" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.3.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Services\" />
+    <ProjectReference Include="..\BiteWise.DLL\BiteWise.DLL.csproj" />
   </ItemGroup>
 
 </Project>

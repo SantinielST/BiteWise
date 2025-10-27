@@ -1,0 +1,20 @@
+﻿@model BiteWise.ViewModels.SearchViewModel
+
+@{
+    ViewData["Title"] = "UserList";
+}
+
+@foreach (var user in Model.UserList)
+{
+    <div>
+        @user.UserName
+    </div>
+    <div>
+        @user.Roles[0]
+    </div>
+    <div>
+        <form method="post" asp-controller="User" asp-action="DeleteUser" class="form-inline">
+            <button type="submit">Удалить пользователя</button>
+        </form>
+    </div>
+}

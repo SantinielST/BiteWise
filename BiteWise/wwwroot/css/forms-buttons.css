@@ -1,0 +1,43 @@
+﻿.btn-primary {
+    color: #fff;
+    background-color: #1b6ec2;
+    border: 1px solid #1861ac;
+    padding: 10px 20px;
+    cursor: pointer;
+}
+
+.btn_submit,
+.enter_submit {
+    background-color: #5181b8;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    border-radius: 4px;
+}
+
+.btn_submit {
+    background-color: #04AA6D;
+}
+
+.form-control,
+.frm_text {
+    width: 100%;
+    border-radius: 10px;
+    padding: 8px;
+    margin: 5px 0;
+}
+
+.frm {
+    width: 100%;
+    margin: 20px 0;
+}
+
+.gray-text {
+    font-family: "Cascadia Code", monospace;
+    font: #1a1e21;
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+}

@@ -1,0 +1,66 @@
+﻿.logo-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.logo-img {
+    width: 500px;
+    height: auto;
+}
+
+.main-img {
+    width: 100%;
+    border-radius: 10px;
+}
+
+.block-reg {
+    margin: 20px;
+    padding: 20px;
+    border-radius: 4px;
+    box-shadow: 0 1px 0 0 rgba(0,0,0,0.1);
+    background-color: white;
+}
+
+.date_control {
+    width: 25%;
+    min-width: max-content;
+    display: inline-block;
+}
+
+.date_box {
+    width: 100%;
+}
+
+.logout-btn {
+    margin-left: 10px;
+}
+
+.profile-picture {
+    width: 90px;
+    height: 90px;
+    border-radius: 10%;
+    object-fit: cover;
+    padding-right: 15px;
+}
+
+.center {
+    text-align: center;
+}
+
+.center-align {
+    text-align: center;
+    margin: 5% auto;
+}
+
+.article-container {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.article-card {
+    display: flex;
+    align-items: stretch;
+    padding: 10px;
+    border-radius: 8px;
+}

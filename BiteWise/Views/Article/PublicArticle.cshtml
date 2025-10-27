@@ -1,0 +1,54 @@
+﻿@using System.Security.Claims
+@model BiteWise.ViewModels.ArticleViewModels.ArticleViewModel
+@inject BiteWise.BLL.Services.UserService UserService;
+
+@{
+    ViewData["Title"] = "PublicArticle";
+}
+
+<script src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.17.0/jquery.validate.min.js"></script>
+<script src="https://ajax.aspnetcdn.com/ajax/jquery.validation.unobtrusive/3.2.10/jquery.validate.unobtrusive.min.js"></script>
+<div class="row">
+    <div class="main">
+    <img class="main-img" src="@Model.Image" />
+        <div class="side">
+            <div class="lined-block">
+                <div>
+                <label style="font-size: 32px">@Model.Title</label><br />
+            </div>
+                <div>
+                <label>@Model.Content</label>
+            </div>
+                <div>
+                <label>@Model.Created</label>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (UserService.IsSignIn(User))
+{
+    <div>
+        <button>Тегнуть</button>
+    </div>
+    <div>
+        <button>Прокомментировать</button>
+    </div>
+
+    @if (User.FindFirst(ClaimTypes.NameIdentifier)?.Value == Model.UserEntityId || User.FindFirst(ClaimTypes.Role)?.Value == "Admin" || User.FindFirst(ClaimTypes.Role)?.Value == "Moderator")
+    {
+        <div>
+            <button>Изменить</button>
+        </div>
+        <div>
+            <button>Удалить</button>
+        </div>
+    }
+}
+else
+{
+    <div class="center-align gray-text">
+        Для того, чтобы комментировать или тегнуть статью - зарегистрируйтесь или войдите в аккаунт!
+    </div>
+}

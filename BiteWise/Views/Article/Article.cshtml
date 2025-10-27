@@ -1,0 +1,35 @@
+﻿@model BiteWise.ViewModels.ArticleViewModels.ArticleViewModel
+
+@{
+    ViewData["Title"] = "CreateArticle";
+}
+
+<script src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.17.0/jquery.validate.min.js"></script>
+<script src="https://ajax.aspnetcdn.com/ajax/jquery.validation.unobtrusive/3.2.10/jquery.validate.unobtrusive.min.js"></script>
+
+<div>
+    <div>
+        <form method="get" asp-controller="User" asp-action="MyPage">
+            <input class="enter_submit" type="submit" value="Назад" />
+        </form>
+    </div>
+    <div>
+        <form class="frm" method="post" asp-controller="Article" asp-action="CreateArticle" >
+            <div class="mrgn">
+                <input asp-for="Title" class="form-control" maxlength="65" placeholder="Тема статьи" style="width: 100%" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+            <div class="mrgn">
+                <textarea asp-for="Content" class="form-control" placeholder="Пишите сюда..." style="width: 100%; height: 200px"></textarea>
+                <span asp-validation-for="Content" class="text-danger"></span>
+            </div>
+            <div class="mrgn">
+                <input asp-for="Image" class="form-control" placeholder="Ссылка на иллюстрацию" />
+                <span asp-validation-for="Image" class="text-danger"></span>
+            </div>
+            <div class="center">
+                <button class="btn_submit" type="submit">Отправить</button>
+            </div>
+        </form>
+    </div>
+</div>
