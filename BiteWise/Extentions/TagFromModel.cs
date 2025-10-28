@@ -7,9 +7,7 @@ public static class TagFromModel
 {
     public static Tag Convert(this Tag tag, EditTagViewModel editTagViewModel)
     {
-        tag.UserId = editTagViewModel.UserId;
-        tag.ArticleId = editTagViewModel.ArticleId;
-        tag.Link = editTagViewModel.Link;
+        tag.Name = editTagViewModel.Name;
 
         return tag;
     }

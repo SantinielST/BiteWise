@@ -1,8 +1,11 @@
-﻿namespace BiteWise.ViewModels.TagViewModels;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace BiteWise.ViewModels.TagViewModels;
 
 public class TagViewModel
 {
-    public required string UserId { get; set; }
-    public required string ArticleId { get; set; }
-    public string? Link { get; set; }
+    [Required(ErrorMessage = "Название тега обязательно для заполнения")]
+    [DataType(DataType.Text)]
+    [Display(Name = "Название")]
+    public string? Name { get; set; }
 }

@@ -8,18 +8,25 @@ using System.Security.Claims;
 
 namespace BiteWise.Controllers;
 
-public class ArticleController(IService<Article> articleService) : Controller
+public class ArticleController(IService<Article> articleService, IService<Tag> tagService) : Controller
 {
     private readonly IService<Article> _articleService = articleService;
+    private readonly IService<Tag> _tagService = tagService;
 
     [HttpGet]
     public async Task<IActionResult> Create()
     {
-        return View("Article");
+        var model = new CreateArticleViewModel()
+        {
+            Created = DateTime.Now,
+            AllTags = _tagService.GetAllAsync().Result.ToList(),
+            SelectedTagsIds = new List<string>()
+        };
+        return View("Article", model);
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateArticle(ArticleViewModel articleViewModel)
+    public async Task<IActionResult> CreateArticle(CreateArticleViewModel articleViewModel)
     {
         if (ModelState.IsValid)
         {
@@ -30,7 +37,8 @@ public class ArticleController(IService<Article> articleService) : Controller
                 Content = articleViewModel.Content,
                 Image = articleViewModel.Image,
                 Created = DateTime.Now,
-                UserEntityId = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                UserEntityId = User.FindFirstValue(ClaimTypes.NameIdentifier),
+                SelectedTagsIds = articleViewModel.SelectedTagsIds?.ToList()
             });
 
             return RedirectToAction("Mypage", "User");
