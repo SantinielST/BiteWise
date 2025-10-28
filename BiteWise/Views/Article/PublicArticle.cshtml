@@ -10,28 +10,37 @@
 <script src="https://ajax.aspnetcdn.com/ajax/jquery.validation.unobtrusive/3.2.10/jquery.validate.unobtrusive.min.js"></script>
 <div class="row">
     <div class="main">
-    <img class="main-img" src="@Model.Image" />
         <div class="side">
             <div class="lined-block">
                 <div>
-                <label style="font-size: 32px">@Model.Title</label><br />
-            </div>
-                <div>
+                    @if (Model.Tags is not null)
+                    {
+                        @foreach (var tag in Model.Tags)
+                        {
+                            <label class="badge">@tag.Name</label>
+                        }
+                    }
+                </div>
+                <div style="text-align:center;">
+                <label style="font-size: 32px;">@Model.Title</label><br />
+                </div>
+                <div style="position: relative;
+                    width: 100%;
+                    height: 500px;
+                    overflow: hidden;">
+                    <img class="main-img" src="@Model.Image" />
+                </div>
+                <div style="text-align:justify;">
                 <label>@Model.Content</label>
             </div>
                 <div>
-                <label>@Model.Created</label>
+                    <label style="font-weight:bold">@Model.Created</label>
                 </div>
             </div>
         </div>
-    </div>
-</div>
 
 @if (UserService.IsSignIn(User))
 {
-    <div>
-        <button>Тегнуть</button>
-    </div>
     <div>
         <button>Прокомментировать</button>
     </div>
@@ -49,6 +58,8 @@
 else
 {
     <div class="center-align gray-text">
-        Для того, чтобы комментировать или тегнуть статью - зарегистрируйтесь или войдите в аккаунт!
+                Для того, чтобы комментировать статьи - <a asp-controller="Home" asp-action="Register">зарегистрируйтесь</a> или <a asp-controller="Account" asp-action="Login">войдите</a> в аккаунт!
     </div>
 }
+    </div>
+</div>

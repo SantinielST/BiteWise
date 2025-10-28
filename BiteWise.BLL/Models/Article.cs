@@ -8,4 +8,5 @@ public class Article
     public string? UserEntityId { get; set; }
     public string? Image { get; set; }
     public required DateTime Created { get; set; }
+    public List<string>? SelectedTagsIds { get; set; }
 }

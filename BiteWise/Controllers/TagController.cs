@@ -11,21 +11,30 @@ public class TagController(IService<Tag> tagService) : Controller
 {
     private readonly IService<Tag> _tagService = tagService;
 
-    [Authorize]
+    [HttpGet]
+    public async Task<IActionResult> Create()
+    {
+        return View("CreateTag");
+    }
+
     [HttpPost]
     public async Task<IActionResult> CreateTag(TagViewModel tagViewModel)
     {
-        await _tagService.CreateAsync(new Tag()
+        if (ModelState.IsValid)
         {
-            UserId = tagViewModel.UserId,
-            ArticleId = tagViewModel.ArticleId,
-            Link = tagViewModel.Link
-        });
-
-        return View();
+            await _tagService.CreateAsync(new Tag()
+            {
+                Name = tagViewModel.Name
+            });
+           
+            return RedirectToAction("Create", "Article");
+        }
+        else
+        {
+            return View("CreateTag");
+        }
     }
 
-    [Authorize]
     [HttpPut]
     public async Task<IActionResult> EditTag(EditTagViewModel editTagViewModel)
     {
@@ -44,11 +53,11 @@ public class TagController(IService<Tag> tagService) : Controller
 
     [Authorize]
     [HttpGet]
-    public async Task<IActionResult> GetAllTags(string articleId)
+    public async Task<IActionResult> GetAllTags()
     {
         var model = await _tagService.GetAllAsync();
 
-        return View(model.Where(t => t.ArticleId == articleId));
+        return View(model);
     }
 
     [Authorize]

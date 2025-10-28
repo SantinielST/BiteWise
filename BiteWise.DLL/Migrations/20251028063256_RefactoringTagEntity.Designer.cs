@@ -3,6 +3,7 @@ using System;
 using BiteWise.DLL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BiteWise.DLL.Migrations
 {
     [DbContext(typeof(BiteWiseAppContext))]
-    partial class BiteWiseAppContextModelSnapshot : ModelSnapshot
+    [Migration("20251028063256_RefactoringTagEntity")]
+    partial class RefactoringTagEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.10");

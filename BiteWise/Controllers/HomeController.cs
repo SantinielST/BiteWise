@@ -19,6 +19,11 @@ public class HomeController(IService<Article> articleService) : Controller
         return View(model);
     }
 
+    public async Task<IActionResult> Register()
+    {
+        return View("Register");
+    }
+
     public IActionResult Privacy()
     {
         return View();
