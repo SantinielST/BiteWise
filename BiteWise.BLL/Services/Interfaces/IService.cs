@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using BiteWise.BLL.Models;
+using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 
 namespace BiteWise.BLL.Services.Interfaces;
@@ -6,6 +7,7 @@ namespace BiteWise.BLL.Services.Interfaces;
 public interface IService<T>
 {
     async Task CreateAsync(T model) { }
+    async Task CreateAsyncTagArticleConnection(List<string> tagIds, Article article) { }
     Task UpdateAsync(T model);
     Task DeleteAsync(T model);
     Task<IEnumerable<T>> GetAllAsync();

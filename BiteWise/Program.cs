@@ -6,6 +6,7 @@ using BiteWise.DLL;
 using BiteWise.DLL.Entities;
 using BiteWise.DLL.Repositories;
 using BiteWise.DLL.Repositories.Interfaces;
+using BiteWise.DLL.TablesСonnections;
 using BiteWise.DLL.UoW;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
@@ -41,9 +42,11 @@ public class Program
         builder.Services.AddScoped<IService<Article>, ArticleService>();
         builder.Services.AddScoped<IService<Tag>, TagService>();
         builder.Services.AddScoped<IService<Comment>, CommentService>();
+        builder.Services.AddScoped<IService<TagArticleConnection>, TagArticleConnectionService>();
         builder.Services.AddScoped<IRepository<ArticleEntity>, ArticleRepository>();
         builder.Services.AddScoped<IRepository<TagEntity>, TagRepository>();
         builder.Services.AddScoped<IRepository<CommentEntity>, CommentRepository>();
+        builder.Services.AddScoped<IRepository<TagArticleConnection>, TagArticleConnectionRepository>();
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
         builder.Services.AddAutoMapper((v) => v.AddProfile(new MappingProfile()));
 

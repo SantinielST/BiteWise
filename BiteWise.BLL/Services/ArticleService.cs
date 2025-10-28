@@ -3,14 +3,17 @@ using BiteWise.BLL.Models;
 using BiteWise.BLL.Services.Interfaces;
 using BiteWise.DLL.Entities;
 using BiteWise.DLL.Repositories;
+using BiteWise.DLL.TablesСonnections;
 using BiteWise.DLL.UoW;
 
 namespace BiteWise.BLL.Services;
 
-public class ArticleService(IUnitOfWork unitOfWork, IMapper mapper) : IService<Article>
+public class ArticleService(IUnitOfWork unitOfWork, IMapper mapper, IService<TagArticleConnection> tagArticleConnectionService, IService<Tag> tagService) : IService<Article>
 {
     private readonly IMapper _mapper = mapper;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
+    private readonly IService<TagArticleConnection> _tagArticleConnectionService = tagArticleConnectionService;
+    private readonly IService<Tag> _tagService = tagService;
 
     public async Task CreateAsync(Article article)
     {
@@ -42,7 +45,21 @@ public class ArticleService(IUnitOfWork unitOfWork, IMapper mapper) : IService<A
 
         if (repository is not null)
         {
-            return _mapper.Map<Article>(await repository.Get(id));
+            var article = _mapper.Map<Article>(await repository.Get(id));
+            var tagArticleConnections = _tagArticleConnectionService.GetAllAsync().Result.Where(c => c.ArticleEntityId == article.Id).ToList();
+            article.Tags = [];
+
+            foreach (var tagArticleConnection in tagArticleConnections)
+            {
+                var tag = await _tagService.GetAsync(tagArticleConnection.TagEntityId.ToString());
+
+                if (tag is not null)
+                {
+                    article.Tags.Add(tag);
+                }
+            }
+
+            return article;
         }
 
         throw new NullReferenceException();
@@ -56,9 +73,23 @@ public class ArticleService(IUnitOfWork unitOfWork, IMapper mapper) : IService<A
         {
             var articleList = new List<Article>();
 
-            foreach (var article in repository.GetAll())
+            foreach (var articleEntity in repository.GetAll())
             {
-                articleList.Add(_mapper.Map<Article>(article));
+                var article = _mapper.Map<Article>(articleEntity);
+                var tagArticleConnections = _tagArticleConnectionService.GetAllAsync().Result.Where(c => c.ArticleEntityId == articleEntity.Id).ToList();
+                article.Tags = [];
+
+                foreach (var tagArticleConnection in tagArticleConnections)
+                {
+                    var tag = await _tagService.GetAsync(tagArticleConnection.TagEntityId.ToString());
+
+                    if (tag is not null)
+                    {
+                        article.Tags.Add(tag);
+                    }
+                }
+
+                articleList.Add(article);
             }
 
             return articleList;

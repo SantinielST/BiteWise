@@ -3,14 +3,16 @@ using BiteWise.BLL.Models;
 using BiteWise.BLL.Services.Interfaces;
 using BiteWise.DLL.Entities;
 using BiteWise.DLL.Repositories;
+using BiteWise.DLL.TablesСonnections;
 using BiteWise.DLL.UoW;
 
 namespace BiteWise.BLL.Services;
 
-public class TagService(IUnitOfWork unitOfWork, IMapper mapper) : IService<Tag>
+public class TagService(IUnitOfWork unitOfWork, IMapper mapper, IService<TagArticleConnection> tagArticleConnectionService) : IService<Tag>
 {
     private readonly IMapper _mapper = mapper;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
+    private readonly IService<TagArticleConnection> _tagArticleConnectionService = tagArticleConnectionService;
 
     public async Task CreateAsync(Tag tag)
     {
@@ -51,14 +53,17 @@ public class TagService(IUnitOfWork unitOfWork, IMapper mapper) : IService<Tag>
     public async Task<IEnumerable<Tag>> GetAllAsync()
     {
         var repository = _unitOfWork.GetRepository<TagEntity>() as TagRepository;
+        var tagArticleConnections = _tagArticleConnectionService.GetAllAsync().Result;
 
         if (repository is not null)
         {
             var tagList = new List<Tag>();
 
-            foreach (var tag in repository.GetAll())
+            foreach (var tagEntity in repository.GetAll())
             {
-                tagList.Add(_mapper.Map<Tag>(tag));
+                var tag = _mapper.Map<Tag>(tagEntity);
+                tag.CountArticles = tagArticleConnections.Where(c => c.TagEntityId == tag.Id).Count();
+                tagList.Add(tag);
             }
 
             return tagList;

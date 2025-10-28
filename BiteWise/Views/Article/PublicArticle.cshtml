@@ -6,8 +6,6 @@
     ViewData["Title"] = "PublicArticle";
 }
 
-<script src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.17.0/jquery.validate.min.js"></script>
-<script src="https://ajax.aspnetcdn.com/ajax/jquery.validation.unobtrusive/3.2.10/jquery.validate.unobtrusive.min.js"></script>
 <div class="row">
     <div class="main">
         <div class="side">
@@ -17,7 +15,7 @@
                     {
                         @foreach (var tag in Model.Tags)
                         {
-                            <label class="badge">@tag.Name</label>
+                            <label style="color: black; border: groove" class="badge">@tag.Name</label>
                         }
                     }
                 </div>

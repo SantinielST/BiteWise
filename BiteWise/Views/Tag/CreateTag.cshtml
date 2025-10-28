@@ -7,6 +7,11 @@
 <script src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.17.0/jquery.validate.min.js"></script>
 <script src="https://ajax.aspnetcdn.com/ajax/jquery.validation.unobtrusive/3.2.10/jquery.validate.unobtrusive.min.js"></script>
 
+<div>
+    <form method="get" asp-controller="Article" asp-action="Create">
+        <input class="enter_submit" type="submit" value="Назад" />
+    </form>
+</div>
 <div class="block-reg background-white">
     <div class="center text-color-gray">Создание нового тега</div>
     <form class="frm" method="post" asp-controller="Tag" asp-action="CreateTag">

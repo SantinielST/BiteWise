@@ -9,4 +9,5 @@ public class Article
     public string? Image { get; set; }
     public required DateTime Created { get; set; }
     public List<string>? SelectedTagsIds { get; set; }
+    public List<Tag>? Tags { get; set; }
 }

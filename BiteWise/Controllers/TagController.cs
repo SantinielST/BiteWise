@@ -1,6 +1,7 @@
 ﻿using BiteWise.BLL.Models;
 using BiteWise.BLL.Services.Interfaces;
 using BiteWise.Extentions;
+using BiteWise.ViewModels;
 using BiteWise.ViewModels.TagViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -51,13 +52,15 @@ public class TagController(IService<Tag> tagService) : Controller
         return View();
     }
 
-    [Authorize]
     [HttpGet]
     public async Task<IActionResult> GetAllTags()
     {
-        var model = await _tagService.GetAllAsync();
-
-        return View(model);
+        var model = new AllTagsViewModel()
+        {
+            Tags = [.. _tagService.GetAllAsync().Result]
+        };
+        
+        return View("Tags", model);
     }
 
     [Authorize]

@@ -1,0 +1,38 @@
+﻿@model BiteWise.ViewModels.AllTagsViewModel
+
+@{
+    ViewData["Title"] = "AllTags";
+}
+
+<div>
+    <form method="get" asp-controller="Dashboard" asp-action="Index">
+        <input class="enter_submit" type="submit" value="Назад" />
+    </form>
+</div>
+<div>
+    <a style="text-decoration: none;" asp-controller="Tag" asp-action="Create"
+       class="btn btn-sm btn-outline-secondary">Добавить новый тег?</a>
+</div>
+<div class="mrgn">
+    <p style="margin-top: 10px">
+        Доступные теги:
+    </p>
+    <table style="margin-top: 10px">
+        <tr>
+            <td>Название тега</td>
+            <td>Количество статей с этим тегом</td>
+        </tr>
+        @if (Model.Tags is not null)
+        @foreach (var tag in Model.Tags)
+        {
+            <tr>
+                <td>
+                    <label style="color: black; border: groove" class="badge">@tag.Name</label>
+                </td>
+                <td style="text-align: center">
+                    <label>@tag.CountArticles</label>
+                </td>
+             </tr>
+        }
+    </table>
+</div>

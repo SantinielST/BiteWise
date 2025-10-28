@@ -15,29 +15,31 @@
     </div>
     <div>
         <div>
-            <form method="get" asp-controller="Tag" asp-action="Create">
-                <button>Добавить новый тег?</button>
-            </form>
+             <a style="text-decoration: none;" asp-controller="Tag" asp-action="Create"
+                class="btn btn-sm btn-outline-secondary">Добавить новый тег?</a>
         </div>
         <form class="frm" method="post" asp-controller="Article" asp-action="CreateArticle" >
             @if (Model.AllTags is not null && Model.AllTags?.Count != 0)
             {
                 <div class="form-group">
                     <label>Теги:</label>
-                    <div class="checkbox-list">
-                        @foreach (var tag in Model.AllTags)
-                        {
-                            <div class="form-check">
-                                <input type="checkbox"
-                                       id="tag-@tag.Id"
-                                       name="SelectedTagsIds"
-                                       value="@tag.Id"
-                                       @(Model.SelectedTagsIds.Contains(tag.Id.ToString()) ? "checked" : "")
-                                       class="form-check-input" />
-                                <label class="form-check-label" for="tag-@tag.Id">@tag.Name</label>
-                            </div>
-                        }
-                    </div>
+                    @if (Model.AllTags is not null && Model.SelectedTagsIds is not null)
+                    {
+                        <div style="display: flex" class="checkbox-list">
+                            @foreach (var tag in Model.AllTags)
+                            {
+                                <div style="margin-left: 10px" class="form-check">
+                                    <input type="checkbox"
+                                           id="tag-@tag.Id"
+                                           name="SelectedTagsIds"
+                                           value="@tag.Id"
+                                           @(Model.SelectedTagsIds.Contains(tag.Id.ToString()) ? "checked" : "")
+                                           class="form-check-input" />
+                                    <label class="form-check-label" for="tag-@tag.Id">@tag.Name</label>
+                                </div>
+                            }
+                        </div>
+                    }
                 </div>
             }
             <div class="mrgn">
