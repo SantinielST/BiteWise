@@ -34,4 +34,9 @@ public class HomeController(IService<Article> articleService) : Controller
     {
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
+
+    public IActionResult AccessDeniedError()
+    {
+        return View("AccessDeniedError");
+    }
 }

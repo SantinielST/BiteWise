@@ -6,6 +6,8 @@
     ViewData["Title"] = "UserList";
 }
 
+@if (User.FindAll(ClaimTypes.Role).Any(c => c.Value == "Admin"))
+{
 <form method="get" asp-controller="DashBoard" asp-action="Index" class="form-inline">
     <button type="submit" class="enter_submit">На главную страницу</button>
 </form>
@@ -84,3 +86,8 @@
         }
         </table>
 </div>
+}
+else
+{
+    <meta http-equiv="refresh" content="0, url=@Url.Action("AccessDeniedError", "Home")" />
+}
