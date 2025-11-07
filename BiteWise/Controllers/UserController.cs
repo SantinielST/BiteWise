@@ -3,7 +3,6 @@ using BiteWise.BLL.Services.Interfaces;
 using BiteWise.Extentions;
 using BiteWise.ViewModels;
 using BiteWise.ViewModels.UserViewModels;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -64,7 +63,7 @@ public class UserController(IService<User> userService, IService<Article> _artic
 
     [Route("UserList")]
     [HttpGet]
-    public async Task<IActionResult> UserList(string search)
+    public async Task<IActionResult> UserList(string search) // реализовать поиск!
     {
         var users = await _userService.GetAllAsync();
 
@@ -112,10 +111,46 @@ public class UserController(IService<User> userService, IService<Article> _artic
         return RedirectToAction("EditUser");
     }
 
-    [Authorize(Roles = "Admin")]
-    [HttpDelete]
+    [HttpPost]
+    public async Task<IActionResult> UpdateUserRole(SearchViewModel searchViewModel)
+    {
+        if (ModelState.IsValid)
+        {
+            ArgumentNullException.ThrowIfNull(searchViewModel.UserId);
+            var user = await _userService.GetByIdAsync(searchViewModel.UserId);
+
+            if (user is not null)
+            {
+                ArgumentNullException.ThrowIfNull(searchViewModel.RoleName);
+                await _userService.UpdateRolesAsync(user, searchViewModel.RoleName);
+
+                return RedirectToAction("UserList");
+            }
+        }
+
+        return RedirectToAction("UserList");
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> DeleteUserRole(string role, string userId)
+    {
+        if (ModelState.IsValid)
+        {
+            var user = await _userService.GetByIdAsync(userId);
+
+            if (user is not null)
+            {
+                await _userService.UpdateRolesAsync(user, role);
+                return RedirectToAction("UserList");
+            }
+        }
+
+        return RedirectToAction("UserList");
+    }
+
+    [HttpGet]
     public async Task<IActionResult> DeleteUser()
     {
-        return RedirectToAction("UserList");
+        return View("DeleteUser");
     }
 }

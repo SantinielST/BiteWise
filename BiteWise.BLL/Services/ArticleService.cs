@@ -8,12 +8,17 @@ using BiteWise.DLL.UoW;
 
 namespace BiteWise.BLL.Services;
 
-public class ArticleService(IUnitOfWork unitOfWork, IMapper mapper, IService<TagArticleConnection> tagArticleConnectionService, IService<Tag> tagService) : IService<Article>
+public class ArticleService(IUnitOfWork unitOfWork, 
+    IMapper mapper, 
+    IService<TagArticleConnection> tagArticleConnectionService, 
+    IService<Tag> tagService, 
+    IService<Comment> commentService) : IService<Article>
 {
     private readonly IMapper _mapper = mapper;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly IService<TagArticleConnection> _tagArticleConnectionService = tagArticleConnectionService;
     private readonly IService<Tag> _tagService = tagService;
+    private readonly IService<Comment> _commentService = commentService;
 
     public async Task CreateAsync(Article article)
     {
@@ -30,10 +35,29 @@ public class ArticleService(IUnitOfWork unitOfWork, IMapper mapper, IService<Tag
     public async Task DeleteAsync(Article article)
     {
         var repository = _unitOfWork.GetRepository<ArticleEntity>() as ArticleRepository;
-        var articleEntity = _mapper.Map<ArticleEntity>(article);
+       
+        var tagArticleConnections = _tagArticleConnectionService.GetAllAsync().Result;
+        var comments = _commentService.GetAllAsync().Result;
+
+        foreach (var tagArticleConnection in tagArticleConnections)
+        {
+            if (tagArticleConnection.ArticleEntityId == article.Id)
+            {
+                await _tagArticleConnectionService.DeleteAsync(tagArticleConnection);
+            }
+        }
+
+        foreach (var comment in comments)
+        {
+            if (comment.ArticleId == comment.ArticleId)
+                await _commentService.DeleteAsync(comment);
+        }
 
         if (repository is not null)
         {
+            var articleEntity = await repository.Get(article.Id.ToString());
+            _mapper.Map(articleEntity, article);
+
             await repository.Delete(articleEntity);
             await _unitOfWork.SaveChanges();
         }
@@ -46,8 +70,12 @@ public class ArticleService(IUnitOfWork unitOfWork, IMapper mapper, IService<Tag
         if (repository is not null)
         {
             var article = _mapper.Map<Article>(await repository.Get(id));
+
             var tagArticleConnections = _tagArticleConnectionService.GetAllAsync().Result.Where(c => c.ArticleEntityId == article.Id).ToList();
             article.Tags = [];
+
+            var comments = _commentService.GetAllAsync().Result.Where(c => c.ArticleId == article.Id).ToList();
+            article.Comments = comments;
 
             foreach (var tagArticleConnection in tagArticleConnections)
             {
@@ -104,7 +132,9 @@ public class ArticleService(IUnitOfWork unitOfWork, IMapper mapper, IService<Tag
 
         if (repository is not null)
         {
-            await repository.Update(_mapper.Map<ArticleEntity>(article));
+            var articleEntity = await repository.Get(article.Id.ToString());
+            _mapper.Map(article, articleEntity);
+            await repository.Update(articleEntity);
             await _unitOfWork.SaveChanges();
         }
     }

@@ -11,7 +11,7 @@ public class TagArticleConnectionService(IUnitOfWork unitOfWork) : IService<TagA
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
-    public async Task CreateAsyncTagArticleConnection(List<string> tagIds, Article article)
+    public async Task CreateAsyncTagArticleConnections(List<string> tagIds, Article article)
     {
         var repository = _unitOfWork.GetRepository<TagArticleConnection>() as TagArticleConnectionRepository;
 
@@ -27,6 +27,22 @@ public class TagArticleConnectionService(IUnitOfWork unitOfWork) : IService<TagA
 
                 await repository.Create(tagArticleConnection);
             }
+        }
+    }
+
+    public async Task CreateAsyncTagArticleConnection(string id, Article article)
+    {
+        var repository = _unitOfWork.GetRepository<TagArticleConnection>() as TagArticleConnectionRepository;
+
+        if (repository is not null)
+        {
+                var tagArticleConnection = new TagArticleConnection()
+                {
+                    ArticleEntityId = article.Id,
+                    TagEntityId = Guid.Parse(id)
+                };
+
+                await repository.Create(tagArticleConnection);
         }
     }
 
@@ -52,8 +68,13 @@ public class TagArticleConnectionService(IUnitOfWork unitOfWork) : IService<TagA
         throw new NotImplementedException();
     }
 
-    public Task DeleteAsync(TagArticleConnection model)
+    public async Task DeleteAsync(TagArticleConnection connection)
     {
-        throw new NotImplementedException();
+        var repository = _unitOfWork.GetRepository<TagArticleConnection>() as TagArticleConnectionRepository;
+
+        if (repository is not null)
+        {
+            await repository.Delete(connection);
+        }
     }
 }

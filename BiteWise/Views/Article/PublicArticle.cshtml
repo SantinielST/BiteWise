@@ -1,10 +1,17 @@
 ﻿@using System.Security.Claims
+@using BiteWise.BLL.Models
+@using BiteWise.Extentions
+@using BiteWise.ViewModels.CommentViewModels
 @model BiteWise.ViewModels.ArticleViewModels.ArticleViewModel
 @inject BiteWise.BLL.Services.UserService UserService;
 
 @{
     ViewData["Title"] = "PublicArticle";
 }
+
+<form method="get" asp-controller="DashBoard" asp-action="Index" class="form-inline">
+    <button type="submit" class="enter_submit">На главную страницу</button>
+</form>
 
 <div class="row">
     <div class="main">
@@ -29,27 +36,65 @@
                     <img class="main-img" src="@Model.Image" />
                 </div>
                 <div style="text-align:justify;">
-                <label>@Model.Content</label>
+                <label style="background-color: white; border-radius: 10px; margin-top: 20px; padding: 10px">@Model.Content</label>
             </div>
                 <div>
                     <label style="font-weight:bold">@Model.Created</label>
                 </div>
             </div>
         </div>
+        <div>
+            <table style="margin-top: 10px; width: 100%;">
+            @if (Model.Comments is not null)
+                @foreach (var comment in Model.Comments)
+                {
+                    <tr>
+                        <td style="width: 500px; border: ridge; background-color: white">@comment.Content</td>
+                        <td style="border: ridge">@comment.Created</td>
+                        <td style="border: ridge">@UserService.GetByIdAsync(comment.UserEntityId.ToString()).Result.UserName</td>
+                        @if (User.FindFirst(ClaimTypes.NameIdentifier)?.Value == comment.UserEntityId.ToString() || User.FindAll(ClaimTypes.Role).Any(c => c.Value == "Admin" || c.Value == "Moderator"))
+                        {
+                                <td style="text-align: center; border: ridge">
+                                    @using (Html.BeginForm("GetComment", "Comment", FormMethod.Get))
+                                    {
+                                        @Html.Hidden("commentId", comment.Id)
+                                        <input class="btn btn-sm btn-outline-secondary" type="submit" value="Изменить комментарий" />
+                                    }
+                            </td>
+                        }
+                        @if (User.FindFirst(ClaimTypes.NameIdentifier)?.Value == comment.UserEntityId.ToString() || User.FindAll(ClaimTypes.Role).Any(c => c.Value == "Admin" || c.Value == "Moderator"))
+                        {
+                                <td style="text-align: center; border: ridge">
+                                    @using (Html.BeginForm("DeleteComment", "Comment", FormMethod.Post))
+                                    {
+                                        @Html.Hidden("commentId", comment.Id)
+                                        <input class="btn btn-sm btn-outline-secondary" type="submit" value="Удалить комментарий" />
+                                    }
+                           </td>
+                        }
+                    </tr>
+                }
+             </table>
+        </div>
+        <div>
 
 @if (UserService.IsSignIn(User))
 {
-    <div>
-        <button>Прокомментировать</button>
-    </div>
+    <partial name="AddComment" model="@new CommentViewModel() { ArticleId = Model.Id, UserId = Guid.Parse(User.GetUserId()) }"/>
 
-    @if (User.FindFirst(ClaimTypes.NameIdentifier)?.Value == Model.UserEntityId || User.FindFirst(ClaimTypes.Role)?.Value == "Admin" || User.FindFirst(ClaimTypes.Role)?.Value == "Moderator")
+    @if (User.FindFirst(ClaimTypes.NameIdentifier)?.Value == Model.UserEntityId || User.FindAll(ClaimTypes.Role).Any(c => c.Value == "Admin" || c.Value == "Moderator"))
     {
-        <div>
-            <button>Изменить</button>
+                    <div class="mrgn center-align">
+                <form asp-controller="Article" asp-action="EditArticle" asp-route-id="@Model.Id" method="get">
+                       <input class="enter_submit" type="submit" value="Изменить статью" />
+                </form>
         </div>
-        <div>
-            <button>Удалить</button>
+        <div class="mrgn center-align">
+               @using (Html.BeginForm("DeleteArticle", "Article", FormMethod.Post))
+               {
+                   @Html.Hidden("id", Model.Id.ToString())
+                   <input class="enter_submit" type="submit" value="Удалить статью" />
+               }
         </div>
     }
 }
@@ -59,5 +104,6 @@ else
                 Для того, чтобы комментировать статьи - <a asp-controller="Home" asp-action="Register">зарегистрируйтесь</a> или <a asp-controller="Account" asp-action="Login">войдите</a> в аккаунт!
     </div>
 }
+        </div>
     </div>
 </div>

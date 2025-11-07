@@ -1,5 +1,4 @@
 ﻿using BiteWise.BLL.Models;
-using BiteWise.BLL.Services;
 using BiteWise.BLL.Services.Interfaces;
 using BiteWise.DLL.TablesСonnections;
 using BiteWise.Extentions;
@@ -47,7 +46,7 @@ public class ArticleController(IService<Article> articleService, IService<Tag> t
             if (article.SelectedTagsIds is not null)
             {
                 await _articleService.CreateAsync(article);
-                await _tagArticleConnectionService.CreateAsyncTagArticleConnection(article.SelectedTagsIds, article);
+                await _tagArticleConnectionService.CreateAsyncTagArticleConnections(article.SelectedTagsIds, article);
             }
 
             return RedirectToAction("Mypage", "User");
@@ -55,19 +54,74 @@ public class ArticleController(IService<Article> articleService, IService<Tag> t
         return View("Article", articleViewModel);
     }
 
-    [Authorize]
-    [HttpPut]
-    public async Task<IActionResult> EditArticle(EditArticleViewModel editArticleViewModel)
+    [HttpGet]
+    public async Task<IActionResult> EditArticle(Guid id)
+    {
+        var article = await _articleService.GetAsync(id.ToString());
+
+        if (article != null)
+        {
+            var model = new EditArticleViewModel()
+            {
+                Id = article.Id,
+                Title = article.Title,
+                Content = article.Content,
+                Image = article.Image,
+                Tags = article.Tags,
+                SelectedTagsIds = [],
+                UserEntityId = article.UserEntityId,
+                AllTags = _tagService.GetAllAsync().Result.ToList()
+            };
+            return View(model);
+        }
+        return View();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> UpdateArticle(EditArticleViewModel editArticleViewModel)
     {
         if (ModelState.IsValid)
         {
             var article = await _articleService.GetAsync(editArticleViewModel.Id.ToString());
+            var connections = _tagArticleConnectionService.GetAllAsync().Result;
 
-            if (article is not null) 
+            if (article is not null)
+            {
                 await _articleService.UpdateAsync(article.Convert(editArticleViewModel));
+
+                if (article.SelectedTagsIds is not null)
+                {
+                    foreach (var connection in connections)
+                    {
+                        for (int i = 0; i < article.SelectedTagsIds.Count; i++)
+                        {
+                            if (connection.ArticleEntityId == article.Id && connection.TagEntityId.ToString() == article.SelectedTagsIds[i])
+                            { 
+                                if (article.Tags is not null)
+                                    article.Tags.Remove(article.Tags.First(t => t.Id.ToString() == article.SelectedTagsIds[i]));
+
+                                article.SelectedTagsIds.Remove(article.SelectedTagsIds[i]);
+                            }
+                        }
+                    }
+
+                    await _tagArticleConnectionService.CreateAsyncTagArticleConnections(article.SelectedTagsIds, article);
+                }
+
+                if (article.Tags is not null)
+                {
+                    foreach (var tag in article.Tags)
+                    {
+                        if (article.SelectedTagsIds is null|| article.SelectedTagsIds.Count == 0 || !article.SelectedTagsIds.Contains(tag.Id.ToString()))
+                        {
+                            await _tagArticleConnectionService.DeleteAsync(connections.Where(c => c.TagEntityId == tag.Id && c.ArticleEntityId == article.Id).FirstOrDefault() ?? throw new NullReferenceException());
+                        }
+                    }
+                }
+            }
         }
 
-        return View();
+        return RedirectToAction("GetArticle", new { id = editArticleViewModel.Id.ToString() });
     }
 
     [Authorize]
@@ -86,24 +140,16 @@ public class ArticleController(IService<Article> articleService, IService<Tag> t
 
         if (article is not null)
         {
-            //var tagArticleConnections = _tagArticleConnectionService.GetAllAsync().Result.Where(c => c.ArticleEntityId == article.Id);
-            //var tags = new List<Tag>();
-
-            //foreach (var tagArticleConnection in tagArticleConnections)
-            //{
-            //    var tag = await _tagService.GetAsync(tagArticleConnection.TagEntityId.ToString());
-            //    if (tag is not null)
-            //        tags.Add(tag);
-            //}
-
             var articalViewModel = new ArticleViewModel()
             {
+                Id = article.Id,
                 Image = article.Image,
                 Title = article.Title,
                 Content = article.Content,
                 Created = article.Created,
                 UserEntityId = article.UserEntityId,
-                Tags = article.Tags
+                Tags = article.Tags,
+                Comments = article.Comments
             };
 
             return View("PublicArticle", articalViewModel);
@@ -112,11 +158,11 @@ public class ArticleController(IService<Article> articleService, IService<Tag> t
         return View();
     }
 
-    [HttpDelete]
+    [HttpPost]
     public async Task<IActionResult> DeleteArticle(string id)
     {
         await _articleService.DeleteAsync(await _articleService.GetAsync(id) ?? throw new ArgumentNullException());
 
-        return View();
+        return RedirectToAction("Index", "DashBoard");
     }
 }

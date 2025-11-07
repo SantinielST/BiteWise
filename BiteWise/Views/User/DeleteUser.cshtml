@@ -1,0 +1,9 @@
+﻿@using System.Security.Claims
+
+@if (User.FindAll(ClaimTypes.Role).Any(c => c.Value == "Admin"))
+{
+    <div>
+        <h1 class="display-4 fw-normal">Пользователь удалён!</h1>
+        <p>Реализация временно отключена</p>
+    </div>
+}

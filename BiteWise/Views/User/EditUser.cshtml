@@ -11,7 +11,9 @@
     <h3 class="center">Редактирование пользователя</h3>
     <form class="frm" method="post" asp-controller="User" asp-action="UpdateUser">
         <div asp-validation-summary="ModelOnly"></div>
-        <div style=""><input type="hidden" asp-for="UserId" value="@Model.UserId" /></div>
+        <div style="">
+            <input type="hidden" asp-for="UserId" value="@Model.UserId" />
+            </div>
         <div>
             <div class="mrgn">
                 <input asp-for="Email" class="form-control" />

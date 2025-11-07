@@ -10,4 +10,5 @@ public class Article
     public required DateTime Created { get; set; }
     public List<string>? SelectedTagsIds { get; set; }
     public List<Tag>? Tags { get; set; }
+    public List<Comment>? Comments { get; set; }
 }

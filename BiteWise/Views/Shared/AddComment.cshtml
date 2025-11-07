@@ -1,0 +1,15 @@
+﻿@model BiteWise.ViewModels.CommentViewModels.CommentViewModel
+
+<div>
+    <form method="post" asp-controller="Comment" asp-action="CreateComment">
+        <div>
+            <input hidden asp-for="ArticleId" />
+            <input hidden asp-for="UserId" />
+            <label>Написать комментарий:</label>
+            <textarea asp-for="Content" style="width: 100%; height: 150px; padding: 10px"></textarea>
+        </div>
+        <div>
+            <input class="enter_submit" type="submit" value="Добавить комментарий" />
+        </div>
+    </form>
+</div>

@@ -2,7 +2,7 @@
 
 public class CommentViewModel
 {
-    public required string UserId { get; set; }
-    public required string ArticleId { get; set; }
+    public Guid UserId { get; set; }
+    public  Guid ArticleId { get; set; }
     public string? Content { get; set; }
 }

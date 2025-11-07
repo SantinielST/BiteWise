@@ -12,7 +12,7 @@
 <a class="btn btn-primary" style="text-decoration: none;" asp-controller="Article" asp-action="Create">Написать статью</a>
 <a class="btn btn-primary" style="text-decoration: none;" asp-controller="Tag" asp-action="GetAllTags">Посмотреть все теги</a>
 
-@if (User.FindFirst(ClaimTypes.Role)?.Value == "Admin")
+@if (User.FindAll(ClaimTypes.Role).Any(c => c.Value == "Admin"))
 {
     <a class="btn btn-primary" style="text-decoration: none;" asp-controller="User" asp-action="UserList">Управление пользователями</a>
 }

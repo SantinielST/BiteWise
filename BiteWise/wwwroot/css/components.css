@@ -39,6 +39,14 @@
     margin-left: 10px;
 }
 
+.profile-img {
+    height: 350px;
+    width: 350px;
+    border-radius: 10%;
+    object-fit: cover;
+    padding-right: 15px;
+}
+
 .profile-picture {
     width: 90px;
     height: 90px;

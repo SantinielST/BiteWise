@@ -1,20 +1,86 @@
-﻿@model BiteWise.ViewModels.SearchViewModel
+﻿@using System.Security.Claims
+@using BiteWise.BLL.Models
+@model BiteWise.ViewModels.SearchViewModel
 
 @{
     ViewData["Title"] = "UserList";
 }
 
-@foreach (var user in Model.UserList)
-{
-    <div>
-        @user.UserName
-    </div>
-    <div>
-        @user.Roles[0]
-    </div>
-    <div>
-        <form method="post" asp-controller="User" asp-action="DeleteUser" class="form-inline">
-            <button type="submit">Удалить пользователя</button>
-        </form>
-    </div>
-}
+<form method="get" asp-controller="DashBoard" asp-action="Index" class="form-inline">
+    <button type="submit" class="enter_submit">На главную страницу</button>
+</form>
+
+<div class="mrgn gray-text">
+    <p style="margin-top: 10px">
+        Список всех пользователей приложения:
+    </p>
+</div>
+
+<div>
+    <table style="border: ridge">
+        <tr style="border: ridge">
+            <td style="border: ridge">Логин пользователя</td>
+            <td style="border: ridge">Роли пользователя</td>
+            <td style="border: ridge">Добавить роль пользователю</td>
+            <td style="border: ridge"></td>
+        </tr>
+    @if (Model.UserList is not null && User.FindAll(ClaimTypes.Role).Any(c => c.Value == "Admin"))
+    @foreach (var user in Model.UserList)
+    {
+                <tr style="border: ridge">
+        @if (user.Roles is not null)
+        {
+            <td style="border: ridge">
+                @user.UserName
+            </td>
+            <td style="border: ridge">
+                @if (user.Roles is not null)
+                {    @foreach (var role in user.Roles)
+                    {
+                        <div style="display: flex">
+                            <label>@role</label>
+                            @if (role != "User")
+                            {
+                                @using (Html.BeginForm("DeleteUserRole", "User", FormMethod.Post))
+                                {
+                                    @Html.Hidden("role", role)
+                                    @Html.Hidden("userId", user.Id)
+                                    <button type="submit" class="remove-button">x</button>
+                                }
+                           }
+                        </div>
+                    }
+                }
+            </td>
+                <form method="post" asp-controller="User" asp-action="UpdateUserRole" class="form-inline">
+                   <input asp-for="UserId" hidden value="@user.Id" />
+                   <td style="border: ridge">
+                    <label for="userRoles">Выберите роль:</label>
+                    <select asp-for="RoleName" id="userRoles" name="RoleName">
+                      @if (user.Roles is not null)
+                      {
+                        @if (!user.Roles.Contains("Admin"))
+                        {
+                            <option value="@UserRoles.Admin.ToString()">Admin</option>
+                        }
+                        @if (!user.Roles.Contains("Moderator"))
+                        {
+                            <option value="@UserRoles.Moderator.ToString()">Moderator</option>
+                        }
+                      }
+                    </select>
+                    </td>
+                 <td style="border: ridge">
+                    <button type="submit">Добавить роль пользователю</button>
+                </td>
+                </form>
+            <td style="border: ridge">
+                <form method="get" asp-controller="User" asp-action="DeleteUser" class="form-inline">
+                    <button type="submit">Удалить пользователя</button>
+                </form>
+            </td>
+        }
+                </tr>
+        }
+        </table>
+</div>

@@ -9,6 +9,7 @@ public static class CommentFromModel
     {
         comment.Content = editCommentViewModel.Content;
         comment.ArticleId = editCommentViewModel.ArticleId;
+        comment.UserEntityId = editCommentViewModel.UserId;
         comment.Id = editCommentViewModel.Id;
 
         return comment;

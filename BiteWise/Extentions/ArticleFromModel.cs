@@ -9,7 +9,8 @@ public static class ArticleFromModel
     {
         article.Title = editArticleViewModel.Title;
         article.Content = editArticleViewModel.Content;
-        article.UserEntityId = editArticleViewModel.UserEntityId;
+        article.Image = editArticleViewModel.Image;
+        article.SelectedTagsIds = editArticleViewModel.SelectedTagsIds?.ToList();
 
         return article;
     }

@@ -12,10 +12,7 @@
 else
 {
     <div class="row">
-        <div class="main">
-            <partial name="Login" model="Model.LoginView" />
-            <partial name="Register" model="Model.RegisterView" />
-        </div>
+        
         <div class="side">
             <div class="display-4 fw-normal center-align">
                 Техно блог обо всем!
@@ -53,6 +50,10 @@ else
                 </div>
             }
             </div>
+        </div>
+        <div class="main" style="margin-top: 50px">
+            <partial name="Login" model="Model.LoginView" />
+            <partial name="Register" model="Model.RegisterView" />
         </div>
     </div>
 }

@@ -29,11 +29,21 @@ public class TagService(IUnitOfWork unitOfWork, IMapper mapper, IService<TagArti
     public async Task DeleteAsync(Tag tag)
     {
         var repository = _unitOfWork.GetRepository<TagEntity>() as TagRepository;
-        var tagEntity = _mapper.Map<TagEntity>(tag);
+
+        var tagArticleConnections = _tagArticleConnectionService.GetAllAsync().Result;
+
+        foreach (var tagArticleConnection in tagArticleConnections)
+        {
+            if (tagArticleConnection.TagEntityId == tag.Id)
+            {
+                await _tagArticleConnectionService.DeleteAsync(tagArticleConnection);
+            }
+        }
 
         if (repository is not null)
         {
-            await repository.Delete(tagEntity);
+            var tagEntity = await repository.Get(tag.Id.ToString());
+            await repository.Delete(_mapper.Map(tag, tagEntity));
             await _unitOfWork.SaveChanges();
         }
     }
@@ -78,7 +88,8 @@ public class TagService(IUnitOfWork unitOfWork, IMapper mapper, IService<TagArti
 
         if (repository is not null)
         {
-            await repository.Update(_mapper.Map<TagEntity>(tag));
+            var tagEntity = await repository.Get(tag.Id.ToString());
+            await repository.Update(_mapper.Map(tag, tagEntity));
             await _unitOfWork.SaveChanges();
         }
     }

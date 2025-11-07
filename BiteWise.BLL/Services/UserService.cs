@@ -93,6 +93,21 @@ public class UserService(UserManager<UserEntity> userManager,
         await _userManager.UpdateAsync(userEntity?? throw new NullReferenceException());
     }
 
+    public async Task UpdateRolesAsync(User user, string roleName)
+    {
+        var userEntity = await _userManager.FindByIdAsync(user.Id ?? throw new ArgumentNullException());
+        _mapper.Map(user, userEntity);
+
+        if (userEntity is not null && !_userManager.GetRolesAsync(userEntity).Result.Contains(roleName))
+        {
+            await _userManager.AddToRoleAsync(userEntity, roleName);
+        }
+        else if(userEntity is not null)
+        {
+            await _userManager.RemoveFromRoleAsync(userEntity, roleName);
+        }
+    }
+
     public async Task<User> GetByUserAsync(ClaimsPrincipal user)
     {
         var userEntity = await _userManager.GetUserAsync(user);

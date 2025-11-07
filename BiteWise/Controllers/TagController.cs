@@ -3,7 +3,6 @@ using BiteWise.BLL.Services.Interfaces;
 using BiteWise.Extentions;
 using BiteWise.ViewModels;
 using BiteWise.ViewModels.TagViewModels;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BiteWise.Controllers;
@@ -27,8 +26,8 @@ public class TagController(IService<Tag> tagService) : Controller
             {
                 Name = tagViewModel.Name
             });
-           
-            return RedirectToAction("Create", "Article");
+
+            return RedirectToAction("GetAllTags", "Tag");
         }
         else
         {
@@ -36,7 +35,7 @@ public class TagController(IService<Tag> tagService) : Controller
         }
     }
 
-    [HttpPut]
+    [HttpPost]
     public async Task<IActionResult> EditTag(EditTagViewModel editTagViewModel)
     {
         if (ModelState.IsValid)
@@ -47,9 +46,10 @@ public class TagController(IService<Tag> tagService) : Controller
             {
                 await _tagService.UpdateAsync(tag.Convert(editTagViewModel));
             }
+            return RedirectToAction("GetAllTags", "Tag");
         }
 
-        return View();
+        return View("EditTag");
     }
 
     [HttpGet]
@@ -59,23 +59,38 @@ public class TagController(IService<Tag> tagService) : Controller
         {
             Tags = [.. _tagService.GetAllAsync().Result]
         };
-        
+
         return View("Tags", model);
     }
 
-    [Authorize]
     [HttpGet]
     public async Task<IActionResult> GetTag(string id)
     {
-        return View(await _tagService.GetAsync(id));
+        return View("EditTag", await _tagService.GetAsync(id));
     }
 
-    [Authorize]
-    [HttpDelete]
+    [HttpGet]
+    public async Task<IActionResult> GetTagForEdit(string id)
+    {
+        var tag = await _tagService.GetAsync(id);
+
+        if (tag is not null)
+        {
+            var model = new EditTagViewModel()
+            {
+                Id = tag.Id,
+                Name = tag.Name
+            };
+            return View("EditTag", model);
+        }
+        return View("Tags");
+    }
+
+    [HttpPost]
     public async Task<IActionResult> DeleteTag(string id)
     {
         await _tagService.DeleteAsync(await _tagService.GetAsync(id) ?? throw new ArgumentNullException());
 
-        return View();
+        return RedirectToAction("GetAllTags", "Tag");
     }
 }

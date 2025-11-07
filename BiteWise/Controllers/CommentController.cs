@@ -11,22 +11,21 @@ public class CommentController(IService<Comment> commentService) : Controller
 {
     private readonly IService<Comment> _commentService = commentService;
 
-    [Authorize]
     [HttpPost]
     public async Task<IActionResult> CreateComment(CommentViewModel commentViewModel)
     {
         await _commentService.CreateAsync(new Comment()
         {
-            UserId = commentViewModel.UserId,
+            UserEntityId = commentViewModel.UserId,
             ArticleId = commentViewModel.ArticleId,
-            Content = commentViewModel.Content
+            Content = commentViewModel.Content,
+            Created = DateTime.Now
         });
 
-        return View();
+        return RedirectToAction("GetArticle", "Article", new { id = commentViewModel.ArticleId.ToString() });
     }
 
-    [Authorize]
-    [HttpPut]
+    [HttpPost]
     public async Task<IActionResult> EditComment(EditCommentViewModel editCommentViewModel)
     {
         if (ModelState.IsValid)
@@ -35,9 +34,10 @@ public class CommentController(IService<Comment> commentService) : Controller
 
             if (comment is not null)
                 await _commentService.UpdateAsync(comment.Convert(editCommentViewModel));
-        }
 
-        return View();
+            return RedirectToAction("GetArticle", "Article", new { id = editCommentViewModel?.ArticleId.ToString() });
+        }
+        return RedirectToAction("GetArticle", "Article", new { id = editCommentViewModel?.ArticleId.ToString() });
     }
 
     [Authorize]
@@ -46,22 +46,30 @@ public class CommentController(IService<Comment> commentService) : Controller
     {
         var model = await _commentService.GetAllAsync();
 
-        return View(model.Where(c => c.UserId == userId));
+        return View(model.Where(c => c.UserEntityId.ToString() == userId));
     }
 
-    [Authorize]
     [HttpGet]
-    public async Task<IActionResult> GetComment(string id)
+    public async Task<IActionResult> GetComment(string commentId)
     {
-        return View(await _commentService.GetAsync(id));
+        var comment = await _commentService.GetAsync(commentId);
+
+        var model = new EditCommentViewModel()
+        {
+            Content = comment.Content,
+            Id = comment.Id,
+            UserId = comment.UserEntityId,
+            ArticleId = comment.ArticleId
+        };
+        return View("EditComment", model);
     }
 
-    [Authorize]
-    [HttpDelete]
-    public async Task<IActionResult> DeleteComment(string id)
+    [HttpPost]
+    public async Task<IActionResult> DeleteComment(Guid commentId)
     {
-        await _commentService.DeleteAsync(await _commentService.GetAsync(id)?? throw new ArgumentNullException());
+        var comment = await _commentService.GetAsync(commentId.ToString());
+        await _commentService.DeleteAsync(comment);
 
-        return View();
+        return RedirectToAction("GetArticle", "Article", new { id = comment?.ArticleId.ToString() });
     }
 }

@@ -7,12 +7,14 @@ namespace BiteWise.BLL.Services.Interfaces;
 public interface IService<T>
 {
     async Task CreateAsync(T model) { }
-    async Task CreateAsyncTagArticleConnection(List<string> tagIds, Article article) { }
+    async Task CreateAsyncTagArticleConnections(List<string> tagIds, Article article) { }
     Task UpdateAsync(T model);
     Task DeleteAsync(T model);
     Task<IEnumerable<T>> GetAllAsync();
     Task<T?> GetAsync(string item);
 
+    public async Task CreateAsyncTagArticleConnection(string id, Article article) { }
+    async Task UpdateRolesAsync(T model, string roleName) { }
     async Task<T> GetByIdAsync(string item) => throw new ArgumentNullException();
     async Task<T> GetByUserAsync(ClaimsPrincipal user) => throw new ArgumentNullException();
     async Task<IdentityResult> CreateUserAsync(T model) => throw new ArgumentNullException();

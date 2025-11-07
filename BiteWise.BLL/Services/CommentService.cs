@@ -27,10 +27,12 @@ public class CommentService(IUnitOfWork unitOfWork, IMapper mapper) : IService<C
     public async Task DeleteAsync(Comment comment)
     {
         var repository = _unitOfWork.GetRepository<CommentEntity>() as CommentRepository;
-        var commentEntity = _mapper.Map<CommentEntity>(comment);
 
         if (repository is not null)
         {
+            var commentEntity = await repository.Get(comment.Id.ToString());
+            _mapper.Map(commentEntity, comment);
+
             await repository.Delete(commentEntity);
             await _unitOfWork.SaveChanges();
         }
@@ -42,7 +44,9 @@ public class CommentService(IUnitOfWork unitOfWork, IMapper mapper) : IService<C
 
         if (repository is not null)
         {
-            return _mapper.Map<Comment>(await repository.Get(id));
+            var commentEntity = await repository.Get(id.ToString());
+
+            return _mapper.Map<Comment>(commentEntity);
         }
 
         throw new NullReferenceException();
@@ -56,9 +60,9 @@ public class CommentService(IUnitOfWork unitOfWork, IMapper mapper) : IService<C
         {
             var commentleList = new List<Comment>();
 
-            foreach (var article in repository.GetAll())
+            foreach (var comment in repository.GetAll())
             {
-                commentleList.Add(_mapper.Map<Comment>(article));
+                commentleList.Add(_mapper.Map<Comment>(comment));
             }
 
             return commentleList;
@@ -73,7 +77,10 @@ public class CommentService(IUnitOfWork unitOfWork, IMapper mapper) : IService<C
 
         if (repository is not null)
         {
-            await repository.Update(_mapper.Map<CommentEntity>(comment));
+            var commentEntity = await repository.Get(comment.Id.ToString());
+            _mapper.Map(comment, commentEntity);
+
+            await repository.Update(commentEntity);
             await _unitOfWork.SaveChanges();
         }
     }
