@@ -9,9 +9,12 @@
     ViewData["Title"] = "PublicArticle";
 }
 
-<form method="get" asp-controller="DashBoard" asp-action="Index" class="form-inline">
-    <button type="submit" class="enter_submit">На главную страницу</button>
-</form>
+@if (UserService.IsSignIn(User))
+{
+    <form method="get" asp-controller="DashBoard" asp-action="Index" class="form-inline">
+        <button type="submit" class="enter_submit">На главную страницу</button>
+    </form>
+}
 
 <div class="row">
     <div class="main">
