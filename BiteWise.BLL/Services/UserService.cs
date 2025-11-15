@@ -27,7 +27,8 @@ public class UserService(UserManager<UserEntity> userManager,
         if (user.Password is not null)
         {
             var result = await _userManager.CreateAsync(userEntity, user.Password);
-            await _userManager.AddToRoleAsync(userEntity, "User");
+            if (result.Succeeded)
+                await _userManager.AddToRoleAsync(userEntity, "User");
 
             return result;
         }
@@ -93,7 +94,7 @@ public class UserService(UserManager<UserEntity> userManager,
         await _userManager.UpdateAsync(userEntity?? throw new NullReferenceException());
     }
 
-    public async Task UpdateRolesAsync(User user, string roleName)
+    public async Task<bool> UpdateRolesAsync(User user, string roleName)
     {
         var userEntity = await _userManager.FindByIdAsync(user.Id ?? throw new ArgumentNullException());
         _mapper.Map(user, userEntity);
@@ -102,10 +103,13 @@ public class UserService(UserManager<UserEntity> userManager,
         {
             await _userManager.AddToRoleAsync(userEntity, roleName);
         }
-        else if(userEntity is not null)
+        else if(userEntity is not null && _userManager.GetRolesAsync(userEntity).Result.Count > 1)
         {
-            await _userManager.RemoveFromRoleAsync(userEntity, roleName);
+            var result =  await _userManager.RemoveFromRoleAsync(userEntity, roleName);
+
+            return result.Succeeded;
         }
+        return false;
     }
 
     public async Task<User> GetByUserAsync(ClaimsPrincipal user)

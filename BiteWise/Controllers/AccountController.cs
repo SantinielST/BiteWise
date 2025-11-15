@@ -1,12 +1,14 @@
 ﻿using BiteWise.BLL.Models;
 using BiteWise.BLL.Services.Interfaces;
+using BiteWise.BLL.Services.LogService;
 using BiteWise.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BiteWise.Controllers;
 
-public class AccountController(IService<User> userService) : Controller
+public class AccountController(IService<User> userService, ICustomLogger customLogger) : Controller
 {
+    private readonly ICustomLogger _customLogger = customLogger;
     private readonly IService<User> _userService = userService;
 
     [HttpGet]
@@ -17,7 +19,6 @@ public class AccountController(IService<User> userService) : Controller
         {
             return RedirectToAction("Index", "Dashboard");
         }
-
         return View(new LoginViewModel { ReturnUrl = returnUrl });
     }
 
@@ -34,16 +35,16 @@ public class AccountController(IService<User> userService) : Controller
 
                 if (result)
                 {
+                    _customLogger.LoggingInfo(InfoTypes.LoginCompleted, model.Email);
                     await _userService.SignInAsync(model.Email, false);
                     return RedirectToAction("Index", "Dashboard");
                 }
             }
-
+            _customLogger.LoggingUserError(UserErrorsType.WrongLoginOrPassword);
             ModelState.AddModelError(nameof(model.Email), " ");
             ModelState.AddModelError(nameof(model.Password), "Неправильный логин и (или) пароль");
-
         }
-
+        _customLogger.LoggingUserError(UserErrorsType.WrongLoginOrPassword);
         return View(model);
     }
 
@@ -53,6 +54,7 @@ public class AccountController(IService<User> userService) : Controller
     public async Task<IActionResult> Logout()
     {
         await _userService.SignOutAsync();
+        _customLogger.LoggingInfo(InfoTypes.LogOut, User.Identity?.Name ?? "Ошибка логина пользователя");
         return RedirectToAction("Index", "Home");
     }
 }

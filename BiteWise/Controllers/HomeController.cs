@@ -39,4 +39,9 @@ public class HomeController(IService<Article> articleService) : Controller
     {
         return View("AccessDeniedError");
     }
+
+    public IActionResult SomethingWentWrongError()
+    {
+        return View("SomethingWentWrongError");
+    }
 }

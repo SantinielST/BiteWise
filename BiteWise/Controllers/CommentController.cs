@@ -1,5 +1,6 @@
 ﻿using BiteWise.BLL.Models;
 using BiteWise.BLL.Services.Interfaces;
+using BiteWise.BLL.Services.LogService;
 using BiteWise.Extentions;
 using BiteWise.ViewModels.CommentViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -7,20 +8,30 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BiteWise.Controllers;
 
-public class CommentController(IService<Comment> commentService) : Controller
+public class CommentController(IService<Comment> commentService, ICustomLogger customLogger) : Controller
 {
+    private readonly ICustomLogger _customLogger = customLogger;
     private readonly IService<Comment> _commentService = commentService;
 
     [HttpPost]
     public async Task<IActionResult> CreateComment(CommentViewModel commentViewModel)
     {
-        await _commentService.CreateAsync(new Comment()
+        if (ModelState.IsValid)
         {
-            UserEntityId = commentViewModel.UserId,
-            ArticleId = commentViewModel.ArticleId,
-            Content = commentViewModel.Content,
-            Created = DateTime.Now
-        });
+            await _commentService.CreateAsync(new Comment()
+            {
+                UserEntityId = commentViewModel.UserId,
+                ArticleId = commentViewModel.ArticleId,
+                Content = commentViewModel.Content,
+                Created = DateTime.Now
+            });
+
+            _customLogger.LoggingInfo(InfoTypes.CommentCreateSuccseed, User.Identity?.Name ?? "Ошибка логина пользователя");
+        }
+        else
+        {
+            _customLogger.LoggingUserError(UserErrorsType.General);
+        }
 
         return RedirectToAction("GetArticle", "Article", new { id = commentViewModel.ArticleId.ToString() });
     }
@@ -33,10 +44,19 @@ public class CommentController(IService<Comment> commentService) : Controller
             var comment = await _commentService.GetAsync(editCommentViewModel.Id.ToString());
 
             if (comment is not null)
+            {
                 await _commentService.UpdateAsync(comment.Convert(editCommentViewModel));
+                _customLogger.LoggingInfo(InfoTypes.CommentCreateSuccseed, User.Identity?.Name ?? "Ошибка логина пользователя");
+            }
+            else
+            {
+                _customLogger.LoggingUserError(UserErrorsType.General);
+            }
 
             return RedirectToAction("GetArticle", "Article", new { id = editCommentViewModel?.ArticleId.ToString() });
         }
+
+        _customLogger.LoggingUserError(UserErrorsType.General);
         return RedirectToAction("GetArticle", "Article", new { id = editCommentViewModel?.ArticleId.ToString() });
     }
 
@@ -54,22 +74,32 @@ public class CommentController(IService<Comment> commentService) : Controller
     {
         var comment = await _commentService.GetAsync(commentId);
 
-        var model = new EditCommentViewModel()
+        if (comment is not null)
         {
-            Content = comment.Content,
-            Id = comment.Id,
-            UserId = comment.UserEntityId,
-            ArticleId = comment.ArticleId
-        };
-        return View("EditComment", model);
+            var model = new EditCommentViewModel()
+            {
+                Content = comment.Content,
+                Id = comment.Id,
+                UserId = comment.UserEntityId,
+                ArticleId = comment.ArticleId
+            };
+
+            return View("EditComment", model);
+        }
+        return View();
     }
 
     [HttpPost]
     public async Task<IActionResult> DeleteComment(Guid commentId)
     {
         var comment = await _commentService.GetAsync(commentId.ToString());
-        await _commentService.DeleteAsync(comment);
 
+        if (comment is not null)
+        {
+            await _commentService.DeleteAsync(comment);
+            _customLogger.LoggingInfo(InfoTypes.CommentDeleteSuccseed, User.Identity?.Name ?? "Ошибка логина пользователя");
+            return RedirectToAction("GetArticle", "Article", new { id = comment?.ArticleId.ToString() });
+        }
         return RedirectToAction("GetArticle", "Article", new { id = comment?.ArticleId.ToString() });
     }
 }

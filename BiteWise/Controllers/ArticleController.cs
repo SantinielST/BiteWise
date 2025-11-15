@@ -1,5 +1,6 @@
 ﻿using BiteWise.BLL.Models;
 using BiteWise.BLL.Services.Interfaces;
+using BiteWise.BLL.Services.LogService;
 using BiteWise.DLL.TablesСonnections;
 using BiteWise.Extentions;
 using BiteWise.ViewModels.ArticleViewModels;
@@ -9,8 +10,12 @@ using System.Security.Claims;
 
 namespace BiteWise.Controllers;
 
-public class ArticleController(IService<Article> articleService, IService<Tag> tagService, IService<TagArticleConnection> tagArticleConnectionService) : Controller
+public class ArticleController(IService<Article> articleService,
+    IService<Tag> tagService,
+    IService<TagArticleConnection> tagArticleConnectionService,
+    ICustomLogger customLogger) : Controller
 {
+    private readonly ICustomLogger _customLogger = customLogger;
     private readonly IService<Article> _articleService = articleService;
     private readonly IService<Tag> _tagService = tagService;
     private readonly IService<TagArticleConnection> _tagArticleConnectionService = tagArticleConnectionService;
@@ -22,7 +27,7 @@ public class ArticleController(IService<Article> articleService, IService<Tag> t
         {
             Created = DateTime.Now,
             AllTags = _tagService.GetAllAsync().Result.ToList(),
-            SelectedTagsIds = new List<string>()
+            SelectedTagsIds = []
         };
         return View("Article", model);
     }
@@ -49,8 +54,11 @@ public class ArticleController(IService<Article> articleService, IService<Tag> t
                 await _tagArticleConnectionService.CreateAsyncTagArticleConnections(article.SelectedTagsIds, article);
             }
 
+            _customLogger.LoggingInfo(InfoTypes.ArticleCreateSuccseed, User.Identity?.Name ?? "Ошибка логина пользователя");
             return RedirectToAction("Mypage", "User");
         }
+
+        _customLogger.LoggingUserError(UserErrorsType.General);
         return View("Article", articleViewModel);
     }
 
@@ -118,6 +126,7 @@ public class ArticleController(IService<Article> articleService, IService<Tag> t
                         }
                     }
                 }
+                _customLogger.LoggingInfo(InfoTypes.ArticleEditSuccseed, User.Identity?.Name ?? "Ошибка логина пользователя");
             }
         }
 
@@ -162,7 +171,7 @@ public class ArticleController(IService<Article> articleService, IService<Tag> t
     public async Task<IActionResult> DeleteArticle(string id)
     {
         await _articleService.DeleteAsync(await _articleService.GetAsync(id) ?? throw new ArgumentNullException());
-
+        _customLogger.LoggingInfo(InfoTypes.ArticleDeleteSuccseed, User.Identity?.Name ?? "Ошибка логина пользователя");
         return RedirectToAction("Index", "DashBoard");
     }
 }

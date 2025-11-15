@@ -10,6 +10,8 @@ public class RegisterViewModel
     public string? EmailReg { get; set; }
 
     [Required(ErrorMessage = "Пароль обязательно для заполнения")]
+    [RegularExpression(@"^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[.!@#$%^&*()_+\-]).{5,}$",
+        ErrorMessage = "Пароль должен быть не менее 5 символов и содержать цифру, заглавную и строчную буквы, и спецсимвол: .!@#$%^&*()_-+.")]
     [DataType(DataType.Password)]
     [Display(Name = "Пароль", Prompt = "Введите пароль")]
     [StringLength(100, ErrorMessage = "Поле {0} должно иметь минимум {2} и максимум {1} символов.", MinimumLength = 5)]

@@ -2,12 +2,14 @@ using BiteWise.BLL;
 using BiteWise.BLL.Models;
 using BiteWise.BLL.Services;
 using BiteWise.BLL.Services.Interfaces;
+using BiteWise.BLL.Services.LogService;
 using BiteWise.DLL;
 using BiteWise.DLL.Entities;
 using BiteWise.DLL.Repositories;
 using BiteWise.DLL.Repositories.Interfaces;
 using BiteWise.DLL.TablesСonnections;
 using BiteWise.DLL.UoW;
+using BiteWise.Middlewares;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -37,6 +39,7 @@ public class Program
             .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<BiteWiseAppContext>();
 
+        builder.Services.AddSingleton<ICustomLogger, CustomLogger>();
         builder.Services.AddScoped<UserService>();
         builder.Services.AddScoped<IService<User>, UserService>();
         builder.Services.AddScoped<IService<Article>, ArticleService>();
@@ -55,6 +58,8 @@ public class Program
         builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie();
 
         var app = builder.Build();
+
+        app.UseExceptionMiddleware();
 
         using (var scope = app.Services.CreateScope())
         {

@@ -1,5 +1,6 @@
 ﻿using BiteWise.BLL.Models;
 using BiteWise.BLL.Services.Interfaces;
+using BiteWise.BLL.Services.LogService;
 using BiteWise.Extentions;
 using BiteWise.ViewModels;
 using BiteWise.ViewModels.TagViewModels;
@@ -7,8 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BiteWise.Controllers;
 
-public class TagController(IService<Tag> tagService) : Controller
+public class TagController(IService<Tag> tagService, ICustomLogger customLogger) : Controller
 {
+    private readonly ICustomLogger _customLogger = customLogger;
     private readonly IService<Tag> _tagService = tagService;
 
     [HttpGet]
@@ -27,10 +29,12 @@ public class TagController(IService<Tag> tagService) : Controller
                 Name = tagViewModel.Name
             });
 
+            _customLogger.LoggingInfo(InfoTypes.TagCreateSuccseed, User.Identity?.Name ?? "Ошибка логина пользователя");
             return RedirectToAction("GetAllTags", "Tag");
         }
         else
         {
+            _customLogger.LoggingUserError(UserErrorsType.General);
             return View("CreateTag");
         }
     }
@@ -46,9 +50,10 @@ public class TagController(IService<Tag> tagService) : Controller
             {
                 await _tagService.UpdateAsync(tag.Convert(editTagViewModel));
             }
+            _customLogger.LoggingInfo(InfoTypes.TagEditSuccseed, User.Identity?.Name ?? "Ошибка логина пользователя");
             return RedirectToAction("GetAllTags", "Tag");
         }
-
+        _customLogger.LoggingUserError(UserErrorsType.General);
         return View("EditTag");
     }
 
@@ -90,7 +95,7 @@ public class TagController(IService<Tag> tagService) : Controller
     public async Task<IActionResult> DeleteTag(string id)
     {
         await _tagService.DeleteAsync(await _tagService.GetAsync(id) ?? throw new ArgumentNullException());
-
+        _customLogger.LoggingInfo(InfoTypes.TagDeleteSuccseed, User.Identity?.Name ?? "Ошибка логина пользователя");
         return RedirectToAction("GetAllTags", "Tag");
     }
 }

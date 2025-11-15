@@ -14,7 +14,7 @@ public interface IService<T>
     Task<T?> GetAsync(string item);
 
     public async Task CreateAsyncTagArticleConnection(string id, Article article) { }
-    async Task UpdateRolesAsync(T model, string roleName) { }
+    async Task<bool> UpdateRolesAsync(T model, string roleName) => throw new ArgumentNullException();
     async Task<T> GetByIdAsync(string item) => throw new ArgumentNullException();
     async Task<T> GetByUserAsync(ClaimsPrincipal user) => throw new ArgumentNullException();
     async Task<IdentityResult> CreateUserAsync(T model) => throw new ArgumentNullException();
