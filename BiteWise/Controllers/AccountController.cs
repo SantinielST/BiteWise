@@ -6,6 +6,11 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BiteWise.Controllers;
 
+/// <summary>
+/// Контроллер для работы с аккаунтом
+/// </summary>
+/// <param name="userService"></param>
+/// <param name="customLogger"></param>
 public class AccountController(IService<User> userService, ICustomLogger customLogger) : Controller
 {
     private readonly ICustomLogger _customLogger = customLogger;

@@ -1,14 +1,11 @@
 ﻿using BiteWise.BLL.Models;
-using BiteWise.ViewModels.ArticleViewModels;
+using BiteWise.Contracts.ArticleDtos;
 
 namespace BiteWise.Extentions;
 
-/// <summary>
-/// Расширение для ручного маппинга статей
-/// </summary>
 public static class ArticleFromModel
 {
-    public static Article Convert(this Article article, EditArticleViewModel editArticleViewModel)
+    public static Article Convert(this Article article, EditArticleDto editArticleViewModel)
     {
         article.Title = editArticleViewModel.Title;
         article.Content = editArticleViewModel.Content;

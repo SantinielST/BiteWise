@@ -2,9 +2,6 @@
 
 namespace BiteWise.Extentions;
 
-/// <summary>
-/// Расширение для получения Id пользователя
-/// </summary>
 public static class ClaimsPrincipalExtensions
 {
     public static string GetUserId(this ClaimsPrincipal user)

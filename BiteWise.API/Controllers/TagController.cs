@@ -1,51 +1,45 @@
 ﻿using BiteWise.BLL.Models;
 using BiteWise.BLL.Services.Interfaces;
 using BiteWise.BLL.Services.LogService;
+using BiteWise.Contracts;
+using BiteWise.Contracts.TagDtos;
 using BiteWise.Extentions;
-using BiteWise.ViewModels;
-using BiteWise.ViewModels.TagViewModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BiteWise.Controllers;
 
-/// <summary>
-/// Контроллер для работы с тегами
-/// </summary>
-/// <param name="tagService"></param>
-/// <param name="customLogger"></param>
-public class TagController(IService<Tag> tagService, ICustomLogger customLogger) : Controller
+[ApiController]
+[Route("[controller]")]
+public class TagController(IService<Tag> tagService, ICustomLogger customLogger) : ControllerBase
 {
     private readonly ICustomLogger _customLogger = customLogger;
     private readonly IService<Tag> _tagService = tagService;
 
-    [HttpGet]
-    public IActionResult Create()
-    {
-        return View("CreateTag");
-    }
-
     [HttpPost]
-    public async Task<IActionResult> CreateTag(TagViewModel tagViewModel)
+    public async Task<IActionResult> CreateTag([FromBody] TagDto tagViewModel)
     {
         if (ModelState.IsValid)
         {
+            var id = Guid.NewGuid();
+
             await _tagService.CreateAsync(new Tag()
             {
+                Id = id,
                 Name = tagViewModel.Name
             });
 
             _customLogger.LoggingInfo(InfoTypes.TagCreateSuccseed, User.Identity?.Name ?? "Ошибка логина пользователя");
-            return RedirectToAction("GetAllTags", "Tag");
+            return StatusCode(201, $"Новый тег {tagViewModel.Name} создан. Идентификатор: {id}");
         }
         else
         {
             _customLogger.LoggingUserError(UserErrorsType.General);
-            return View("CreateTag");
+            return StatusCode(400, $"Ошибка: Произошла ошибка с валидацией данных!");
         }
     }
 
-    [HttpPost]
-    public async Task<IActionResult> EditTag(EditTagViewModel editTagViewModel)
+    [HttpPut]
+    public async Task<IActionResult> EditTag([FromBody] EditTagDto editTagViewModel)
     {
         if (ModelState.IsValid)
         {
@@ -56,51 +50,29 @@ public class TagController(IService<Tag> tagService, ICustomLogger customLogger)
                 await _tagService.UpdateAsync(tag.Convert(editTagViewModel));
             }
             _customLogger.LoggingInfo(InfoTypes.TagEditSuccseed, User.Identity?.Name ?? "Ошибка логина пользователя");
-            return RedirectToAction("GetAllTags", "Tag");
+            return StatusCode(201, $"Тег {editTagViewModel.Name} изменён. Идентификатор: {editTagViewModel.Id}"); ;
         }
         _customLogger.LoggingUserError(UserErrorsType.General);
-        return View("EditTag");
+        return StatusCode(400, $"Ошибка: Произошла ошибка с валидацией данных!");
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAllTags()
     {
-        var model = new AllTagsViewModel()
+        var request = new AllTagsDto()
         {
             Tags = [.. _tagService.GetAllAsync().Result]
         };
 
-        return View("Tags", model);
+        return StatusCode(200, request);
     }
 
-    [HttpGet]
-    public async Task<IActionResult> GetTag(string id)
-    {
-        return View("EditTag", await _tagService.GetAsync(id));
-    }
-
-    [HttpGet]
-    public async Task<IActionResult> GetTagForEdit(string id)
+    [HttpDelete]
+    public async Task<IActionResult> DeleteTag([FromRoute] string id)
     {
         var tag = await _tagService.GetAsync(id);
-
-        if (tag is not null)
-        {
-            var model = new EditTagViewModel()
-            {
-                Id = tag.Id,
-                Name = tag.Name
-            };
-            return View("EditTag", model);
-        }
-        return View("Tags");
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> DeleteTag(string id)
-    {
-        await _tagService.DeleteAsync(await _tagService.GetAsync(id) ?? throw new ArgumentNullException());
+        await _tagService.DeleteAsync(tag ?? throw new ArgumentNullException());
         _customLogger.LoggingInfo(InfoTypes.TagDeleteSuccseed, User.Identity?.Name ?? "Ошибка логина пользователя");
-        return RedirectToAction("GetAllTags", "Tag");
+        return StatusCode(201, $"Тег {tag.Name} удален. Идентификатор: {tag.Id}");
     }
 }

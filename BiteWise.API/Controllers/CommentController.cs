@@ -1,30 +1,28 @@
 ﻿using BiteWise.BLL.Models;
 using BiteWise.BLL.Services.Interfaces;
 using BiteWise.BLL.Services.LogService;
+using BiteWise.Contracts.CommentDto;
 using BiteWise.Extentions;
-using BiteWise.ViewModels.CommentViewModels;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BiteWise.Controllers;
 
-/// <summary>
-/// Контроллер для работы с комментарием
-/// </summary>
-/// <param name="commentService"></param>
-/// <param name="customLogger"></param>
-public class CommentController(IService<Comment> commentService, ICustomLogger customLogger) : Controller
+[ApiController]
+[Route("[controller]")]
+public class CommentController(IService<Comment> commentService, ICustomLogger customLogger) : ControllerBase
 {
     private readonly ICustomLogger _customLogger = customLogger;
     private readonly IService<Comment> _commentService = commentService;
 
     [HttpPost]
-    public async Task<IActionResult> CreateComment(CommentViewModel commentViewModel)
+    public async Task<IActionResult> CreateComment([FromBody] CommentDto commentViewModel)
     {
         if (ModelState.IsValid)
         {
+            var id = Guid.NewGuid();
             await _commentService.CreateAsync(new Comment()
             {
+                Id = id,
                 UserEntityId = commentViewModel.UserId,
                 ArticleId = commentViewModel.ArticleId,
                 Content = commentViewModel.Content,
@@ -32,17 +30,17 @@ public class CommentController(IService<Comment> commentService, ICustomLogger c
             });
 
             _customLogger.LoggingInfo(InfoTypes.CommentCreateSuccseed, User.Identity?.Name ?? "Ошибка логина пользователя");
+            return StatusCode(201, $"Новый коментарий создан. Идентификатор: {id}");
         }
         else
         {
             _customLogger.LoggingUserError(UserErrorsType.General);
+            return StatusCode(400, $"Ошибка: Произошла ошибка с валидацией данных!");
         }
-
-        return RedirectToAction("GetArticle", "Article", new { id = commentViewModel.ArticleId.ToString() });
     }
 
-    [HttpPost]
-    public async Task<IActionResult> EditComment(EditCommentViewModel editCommentViewModel)
+    [HttpPut]
+    public async Task<IActionResult> EditComment([FromBody] EditCommentDto editCommentViewModel)
     {
         if (ModelState.IsValid)
         {
@@ -52,50 +50,29 @@ public class CommentController(IService<Comment> commentService, ICustomLogger c
             {
                 await _commentService.UpdateAsync(comment.Convert(editCommentViewModel));
                 _customLogger.LoggingInfo(InfoTypes.CommentCreateSuccseed, User.Identity?.Name ?? "Ошибка логина пользователя");
+                return StatusCode(201, $"Коментарий изменён. Идентификатор: {comment.Id}");
             }
             else
             {
                 _customLogger.LoggingUserError(UserErrorsType.General);
+                return StatusCode(400, $"Ошибка: Произошла ошибка с валидацией данных!");
             }
-
-            return RedirectToAction("GetArticle", "Article", new { id = editCommentViewModel?.ArticleId.ToString() });
         }
 
         _customLogger.LoggingUserError(UserErrorsType.General);
-        return RedirectToAction("GetArticle", "Article", new { id = editCommentViewModel?.ArticleId.ToString() });
-    }
-
-    [Authorize]
-    [HttpGet]
-    public async Task<IActionResult> GetAllComments(string userId)
-    {
-        var model = await _commentService.GetAllAsync();
-
-        return View(model.Where(c => c.UserEntityId.ToString() == userId));
+        return StatusCode(400, $"Ошибка: Произошла ошибка с валидацией данных!");
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetComment(string commentId)
+    public async Task<IActionResult> GetAllComments()
     {
-        var comment = await _commentService.GetAsync(commentId);
+        var request = await _commentService.GetAllAsync();
 
-        if (comment is not null)
-        {
-            var model = new EditCommentViewModel()
-            {
-                Content = comment.Content,
-                Id = comment.Id,
-                UserId = comment.UserEntityId,
-                ArticleId = comment.ArticleId
-            };
-
-            return View("EditComment", model);
-        }
-        return View();
+        return StatusCode(200, request);
     }
 
-    [HttpPost]
-    public async Task<IActionResult> DeleteComment(Guid commentId)
+    [HttpDelete]
+    public async Task<IActionResult> DeleteComment([FromRoute] string commentId)
     {
         var comment = await _commentService.GetAsync(commentId.ToString());
 
@@ -103,8 +80,8 @@ public class CommentController(IService<Comment> commentService, ICustomLogger c
         {
             await _commentService.DeleteAsync(comment);
             _customLogger.LoggingInfo(InfoTypes.CommentDeleteSuccseed, User.Identity?.Name ?? "Ошибка логина пользователя");
-            return RedirectToAction("GetArticle", "Article", new { id = comment?.ArticleId.ToString() });
+            return StatusCode(201, $"Коментарий удален. Идентификатор: {comment.Id}");
         }
-        return RedirectToAction("GetArticle", "Article", new { id = comment?.ArticleId.ToString() });
+        return StatusCode(400, $"Ошибка: Произошла ошибка с валидацией данных!");
     }
 }

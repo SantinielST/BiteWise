@@ -1,14 +1,11 @@
 ﻿using BiteWise.BLL.Models;
-using BiteWise.ViewModels.UserViewModels;
+using BiteWise.Contracts.UserDtos;
 
 namespace BiteWise.Extentions;
 
-/// <summary>
-/// Расширение для ручного маппинга пользователей
-/// </summary>
 public static class UserFromModel
 {
-    public static User Convert(this User user, UserEditViewModel userEditViewModel)
+    public static User Convert(this User user, UserEditDto userEditViewModel)
     {
         user.UserName = userEditViewModel.Email;
         user.About = userEditViewModel.About;

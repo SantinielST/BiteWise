@@ -1,14 +1,11 @@
 ﻿using BiteWise.BLL.Models;
-using BiteWise.ViewModels.CommentViewModels;
+using BiteWise.Contracts.CommentDto;
 
 namespace BiteWise.Extentions;
 
-/// <summary>
-/// Расширение для ручного маппинга комментариев
-/// </summary>
 public static class CommentFromModel
 {
-    public static Comment Convert(this Comment comment, EditCommentViewModel editCommentViewModel)
+    public static Comment Convert(this Comment comment, EditCommentDto editCommentViewModel)
     {
         comment.Content = editCommentViewModel.Content;
         comment.ArticleId = editCommentViewModel.ArticleId;

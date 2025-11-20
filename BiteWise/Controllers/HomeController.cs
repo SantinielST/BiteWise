@@ -7,11 +7,15 @@ using System.Diagnostics;
 
 namespace BiteWise.Controllers;
 
+/// <summary>
+/// Основной контроллер после старта приложения и загрузки представлений с ошибками
+/// </summary>
+/// <param name="articleService"></param>
 public class HomeController(IService<Article> articleService) : Controller
 {
     private readonly IService<Article> _articleService= articleService;
 
-    public async Task<IActionResult> Index()
+    public IActionResult Index()
     {
         var model = new MainViewModel();
         model.DashBoardView.Articles = [.. _articleService.GetAllAsync().Result.OrderByDescending(a => a.Created)];
@@ -19,7 +23,7 @@ public class HomeController(IService<Article> articleService) : Controller
         return View(model);
     }
 
-    public async Task<IActionResult> Register()
+    public IActionResult Register()
     {
         return View("Register");
     }

@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="BiteWise.API/BiteWise.API.csproj" Id="45a8ef3e-276c-450d-87f5-6eae9551ea9f" />
   <Project Path="BiteWise.BLL/BiteWise.BLL.csproj" />
   <Project Path="BiteWise.DLL/BiteWise.DLL.csproj" />
   <Project Path="BiteWise/BiteWise.csproj" />

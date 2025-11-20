@@ -1,46 +1,28 @@
 ﻿using BiteWise.BLL.Models;
 using BiteWise.BLL.Services.Interfaces;
 using BiteWise.BLL.Services.LogService;
+using BiteWise.Contracts.ArticleDtos;
 using BiteWise.DLL.TablesСonnections;
 using BiteWise.Extentions;
-using BiteWise.ViewModels.ArticleViewModels;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
 namespace BiteWise.Controllers;
 
-/// <summary>
-/// Контроллер для работы со статьёй
-/// </summary>
-/// <param name="articleService"></param>
-/// <param name="tagService"></param>
-/// <param name="tagArticleConnectionService"></param>
-/// <param name="customLogger"></param>
+[ApiController]
+[Route("[controller]")]
 public class ArticleController(IService<Article> articleService,
     IService<Tag> tagService,
     IService<TagArticleConnection> tagArticleConnectionService,
-    ICustomLogger customLogger) : Controller
+    ICustomLogger customLogger) : ControllerBase
 {
     private readonly ICustomLogger _customLogger = customLogger;
     private readonly IService<Article> _articleService = articleService;
     private readonly IService<Tag> _tagService = tagService;
     private readonly IService<TagArticleConnection> _tagArticleConnectionService = tagArticleConnectionService;
 
-    [HttpGet]
-    public async Task<IActionResult> Create()
-    {
-        var model = new CreateArticleViewModel()
-        {
-            Created = DateTime.Now,
-            AllTags = _tagService.GetAllAsync().Result.ToList(),
-            SelectedTagsIds = []
-        };
-        return View("Article", model);
-    }
-
     [HttpPost]
-    public async Task<IActionResult> CreateArticle(CreateArticleViewModel articleViewModel)
+    public async Task<IActionResult> CreateArticle([FromBody] CreateArticleDto articleViewModel)
     {
         if (ModelState.IsValid)
         {
@@ -62,38 +44,15 @@ public class ArticleController(IService<Article> articleService,
             }
 
             _customLogger.LoggingInfo(InfoTypes.ArticleCreateSuccseed, User.Identity?.Name ?? "Ошибка логина пользователя");
-            return RedirectToAction("Mypage", "User");
+            return StatusCode(201, $"Новая статья {article.Title} создана. Идентификатор: {article.Id}");
         }
 
         _customLogger.LoggingUserError(UserErrorsType.General);
-        return View("Article", articleViewModel);
+        return StatusCode(400, $"Ошибка: Произошла ошибка с валидацией данных!");
     }
 
-    [HttpGet]
-    public async Task<IActionResult> EditArticle(Guid id)
-    {
-        var article = await _articleService.GetAsync(id.ToString());
-
-        if (article != null)
-        {
-            var model = new EditArticleViewModel()
-            {
-                Id = article.Id,
-                Title = article.Title,
-                Content = article.Content,
-                Image = article.Image,
-                Tags = article.Tags,
-                SelectedTagsIds = [],
-                UserEntityId = article.UserEntityId,
-                AllTags = _tagService.GetAllAsync().Result.ToList()
-            };
-            return View(model);
-        }
-        return View();
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> UpdateArticle(EditArticleViewModel editArticleViewModel)
+    [HttpPut]
+    public async Task<IActionResult> EditArticle([FromBody] EditArticleDto editArticleViewModel)
     {
         if (ModelState.IsValid)
         {
@@ -111,7 +70,7 @@ public class ArticleController(IService<Article> articleService,
                         for (int i = 0; i < article.SelectedTagsIds.Count; i++)
                         {
                             if (connection.ArticleEntityId == article.Id && connection.TagEntityId.ToString() == article.SelectedTagsIds[i])
-                            { 
+                            {
                                 if (article.Tags is not null)
                                     article.Tags.Remove(article.Tags.First(t => t.Id.ToString() == article.SelectedTagsIds[i]));
 
@@ -127,58 +86,34 @@ public class ArticleController(IService<Article> articleService,
                 {
                     foreach (var tag in article.Tags)
                     {
-                        if (article.SelectedTagsIds is null|| article.SelectedTagsIds.Count == 0 || !article.SelectedTagsIds.Contains(tag.Id.ToString()))
+                        if (article.SelectedTagsIds is null || article.SelectedTagsIds.Count == 0 || !article.SelectedTagsIds.Contains(tag.Id.ToString()))
                         {
                             await _tagArticleConnectionService.DeleteAsync(connections.Where(c => c.TagEntityId == tag.Id && c.ArticleEntityId == article.Id).FirstOrDefault() ?? throw new NullReferenceException());
                         }
                     }
                 }
                 _customLogger.LoggingInfo(InfoTypes.ArticleEditSuccseed, User.Identity?.Name ?? "Ошибка логина пользователя");
+                return StatusCode(201, $"Cтатья {article.Title} изменена. Идентификатор: {article.Id}");
             }
         }
 
-        return RedirectToAction("GetArticle", new { id = editArticleViewModel.Id.ToString() });
+        return StatusCode(400, $"Ошибка: Произошла ошибка с валидацией данных!");
     }
 
-    [Authorize]
     [HttpGet]
-    public async Task<IActionResult> GetAllArticles(string userId)
+    public async Task<IActionResult> GetAllArticles()
     {
-        var model = await _articleService.GetAllAsync();
+        var request = await _articleService.GetAllAsync();
 
-        return View(model.Where(a => a.UserEntityId == userId).OrderByDescending(a => a.Created).ToList());
+        return StatusCode(200, request);
     }
 
-    [HttpGet]
-    public async Task<IActionResult> GetArticle(string id)
+    [HttpDelete]
+    public async Task<IActionResult> DeleteArticle([FromRoute] string id)
     {
         var article = await _articleService.GetAsync(id);
-
-        if (article is not null)
-        {
-            var articalViewModel = new ArticleViewModel()
-            {
-                Id = article.Id,
-                Image = article.Image,
-                Title = article.Title,
-                Content = article.Content,
-                Created = article.Created,
-                UserEntityId = article.UserEntityId,
-                Tags = article.Tags,
-                Comments = article.Comments
-            };
-
-            return View("PublicArticle", articalViewModel);
-        }
-
-        return View();
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> DeleteArticle(string id)
-    {
-        await _articleService.DeleteAsync(await _articleService.GetAsync(id) ?? throw new ArgumentNullException());
+        await _articleService.DeleteAsync(article ?? throw new ArgumentNullException());
         _customLogger.LoggingInfo(InfoTypes.ArticleDeleteSuccseed, User.Identity?.Name ?? "Ошибка логина пользователя");
-        return RedirectToAction("Index", "DashBoard");
+        return StatusCode(201, $"Cтатья {article.Title} удалена. Идентификатор: {article.Id}");
     }
 }

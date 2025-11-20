@@ -5,6 +5,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BiteWise.Controllers;
 
+/// <summary>
+/// Контроллер загрузки основного экрана после авторизации
+/// </summary>
+/// <param name="articleService"></param>
 public class DashBoardController(IService<Article> articleService) : Controller
 {
     private readonly IService<Article> _articleService = articleService;

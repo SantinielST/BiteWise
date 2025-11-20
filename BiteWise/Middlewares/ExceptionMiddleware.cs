@@ -2,6 +2,11 @@
 
 namespace BiteWise.Middlewares;
 
+/// <summary>
+/// Глобальный перехватчик исключений в приложении
+/// </summary>
+/// <param name="next"></param>
+/// <param name="customLogger"></param>
 public class ExceptionMiddleware(RequestDelegate next, ICustomLogger customLogger)
 {
     private readonly RequestDelegate _next = next;
