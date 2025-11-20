@@ -67,7 +67,7 @@ public class TagController(IService<Tag> tagService, ICustomLogger customLogger)
         return StatusCode(200, request);
     }
 
-    [HttpDelete]
+    [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteTag([FromRoute] string id)
     {
         var tag = await _tagService.GetAsync(id);

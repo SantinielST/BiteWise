@@ -108,7 +108,7 @@ public class ArticleController(IService<Article> articleService,
         return StatusCode(200, request);
     }
 
-    [HttpDelete]
+    [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteArticle([FromRoute] string id)
     {
         var article = await _articleService.GetAsync(id);

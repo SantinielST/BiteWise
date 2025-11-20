@@ -71,7 +71,7 @@ public class CommentController(IService<Comment> commentService, ICustomLogger c
         return StatusCode(200, request);
     }
 
-    [HttpDelete]
+    [HttpDelete("{commentId}")]
     public async Task<IActionResult> DeleteComment([FromRoute] string commentId)
     {
         var comment = await _commentService.GetAsync(commentId.ToString());
